@@ -2,9 +2,9 @@
 // La URL y la clave publicable de Supabase pueden estar en el navegador.
 // Nunca añadas aquí la clave service_role ni contraseñas.
 window.BOOK_AFFINITY_CONFIG = Object.freeze({
-  supabaseUrl: '',
-  supabasePublishableKey: '',
-  googleBooksApiKey: '',
+  supabaseUrl: 'https://avboupigkstzprrgvlhr.supabase.co',
+  supabasePublishableKey: 'sb_publishable_eyFLhKFk9HXAab4q1cxG4A_-_la1-OI',
+  googleBooksApiKey: 'AIzaSyB1ljgpeiX3ayIFHqpe2NqMWRvMwpOFcYg',
   webVersion: '0.1.0',
   webReleaseDate: '05/08/2026'
 });
