@@ -21,6 +21,14 @@ function showAuthError(error) {
   elements.authMessage.className = 'form-message is-error';
 }
 
+function showAuthConfirmation(options) {
+  if (typeof window.showConfirmationPopup === 'function') {
+    window.showConfirmationPopup(options);
+    return;
+  }
+  showToast(options.message || options.title || 'Operación completada.');
+}
+
 function ensureResendButton() {
   let button = document.querySelector('#auth-resend-button');
   if (button) return button;
@@ -47,6 +55,8 @@ async function signIn(event) {
 
   const email = document.querySelector('#auth-email').value.trim();
   const password = document.querySelector('#auth-password').value;
+  let confirmation = null;
+
   setResendVisible(false);
   elements.authMessage.textContent = 'Iniciando sesión…';
   elements.authMessage.className = 'form-message';
@@ -65,12 +75,22 @@ async function signIn(event) {
     updateAuthButton();
     closeDialog(elements.authDialog);
     await loadLibrary();
-    showToast('Sesión iniciada.');
+    elements.authMessage.textContent = '';
+    confirmation = {
+      eyebrow: 'Sesión iniciada',
+      title: 'Bienvenido',
+      message: `Has iniciado sesión como ${state.user?.email || email}. Tu biblioteca personal ya está disponible.`,
+      icon: '✓',
+      variant: 'success',
+      buttonLabel: 'Continuar'
+    };
   } catch (error) {
     showAuthError(error);
   } finally {
     setAuthOperation(false);
   }
+
+  if (confirmation) showAuthConfirmation(confirmation);
 }
 
 async function signUp() {
@@ -80,7 +100,10 @@ async function signUp() {
   }
 
   const email = document.querySelector('#auth-email').value.trim();
-  const password = document.querySelector('#auth-password').value;
+  const passwordInput = document.querySelector('#auth-password');
+  const password = passwordInput.value;
+  let confirmation = null;
+
   if (!email || password.length < 6) {
     showAuthError('Indica un correo válido y una contraseña de al menos 6 caracteres.');
     return;
@@ -104,24 +127,46 @@ async function signUp() {
       return;
     }
 
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      showAuthError('Ya existe una cuenta con este correo. Prueba a iniciar sesión.');
+      return;
+    }
+
+    passwordInput.value = '';
+    elements.authMessage.textContent = '';
+    closeDialog(elements.authDialog);
+
     if (data.session) {
       state.user = data.session.user;
       updateConnectionState();
       updateAuthButton();
-      closeDialog(elements.authDialog);
       await loadLibrary();
-      showToast('Cuenta creada y sesión iniciada.');
-      return;
+      confirmation = {
+        eyebrow: 'Cuenta creada',
+        title: 'Todo listo',
+        message: `La cuenta ${email} se ha creado correctamente y ya puedes usar tu biblioteca privada.`,
+        icon: '✓',
+        variant: 'success',
+        buttonLabel: 'Entrar en mi biblioteca'
+      };
+    } else {
+      setResendVisible(true);
+      confirmation = {
+        eyebrow: 'Cuenta creada',
+        title: 'Revisa tu correo',
+        message: `Hemos enviado un enlace de confirmación a ${email}. Ábrelo antes de iniciar sesión.`,
+        icon: '✉',
+        variant: 'info',
+        buttonLabel: 'Entendido'
+      };
     }
-
-    elements.authMessage.textContent = 'Cuenta creada. Revisa tu correo y pulsa el enlace de confirmación para poder iniciar sesión.';
-    elements.authMessage.className = 'form-message is-success';
-    setResendVisible(true);
   } catch (error) {
     showAuthError(error);
   } finally {
     setAuthOperation(false);
   }
+
+  if (confirmation) showAuthConfirmation(confirmation);
 }
 
 async function resendConfirmation() {
@@ -136,6 +181,7 @@ async function resendConfirmation() {
   button.disabled = true;
   elements.authMessage.textContent = 'Reenviando confirmación…';
   elements.authMessage.className = 'form-message';
+  let confirmation = null;
 
   try {
     const { error } = await supabaseClient.auth.resend({
@@ -148,18 +194,31 @@ async function resendConfirmation() {
       showAuthError(error);
       return;
     }
-    elements.authMessage.textContent = 'Correo reenviado. Revisa la bandeja de entrada, Spam y Promociones.';
-    elements.authMessage.className = 'form-message is-success';
+
+    elements.authMessage.textContent = '';
+    closeDialog(elements.authDialog);
+    confirmation = {
+      eyebrow: 'Correo enviado',
+      title: 'Revisa tu bandeja',
+      message: `Hemos vuelto a enviar el enlace de confirmación a ${email}. Revisa también Spam y Promociones.`,
+      icon: '✉',
+      variant: 'info',
+      buttonLabel: 'Entendido'
+    };
   } catch (error) {
     showAuthError(error);
   } finally {
     button.disabled = false;
   }
+
+  if (confirmation) showAuthConfirmation(confirmation);
 }
 
 async function handleAuthButton() {
   if (state.user && supabaseClient) {
+    let confirmation = null;
     setAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
+
     try {
       const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
       if (error) {
@@ -171,12 +230,21 @@ async function handleAuthButton() {
       updateConnectionState();
       updateAuthButton();
       await loadLibrary();
-      showToast('Sesión cerrada.');
+      confirmation = {
+        eyebrow: 'Sesión cerrada',
+        title: 'Hasta pronto',
+        message: 'La sesión se ha cerrado correctamente y tu biblioteca privada vuelve a estar protegida.',
+        icon: '✓',
+        variant: 'neutral',
+        buttonLabel: 'Aceptar'
+      };
     } catch (error) {
       showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
     } finally {
       setAuthOperation(false);
     }
+
+    if (confirmation) showAuthConfirmation(confirmation);
     return;
   }
 
@@ -256,7 +324,7 @@ async function initializeAuth() {
 
 async function startApplication() {
   document.querySelector('#year').textContent = new Date().getFullYear();
-  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.1'} · ${config.webReleaseDate || '05/08/2026'}`;
+  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.2'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
   await initializeAuth();
 }
