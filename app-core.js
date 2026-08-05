@@ -205,4 +205,5 @@ function updateAuthButton() {
   if (!elements.authButton) return;
   elements.authButton.textContent = state.user ? 'Mi cuenta' : 'Entrar';
   elements.authButton.title = state.user ? `Gestionar ${accountDisplayName()}` : 'Iniciar sesión';
+  window.refreshConnectedUserUi?.();
 }
