@@ -2,11 +2,11 @@
 // Se mantiene un único punto de entrada para simplificar GitHub Pages.
 (async () => {
   const modules = [
-    'app-core.js?v=0.1.0',
-    'app-library.js?v=0.1.0',
-    'app-forms.js?v=0.1.0',
-    'app-search.js?v=0.1.0',
-    'app-auth-init.js?v=0.1.0'
+    'app-core.js?v=0.1.1',
+    'app-library.js?v=0.1.1',
+    'app-forms.js?v=0.1.1',
+    'app-search.js?v=0.1.1',
+    'app-auth-init.js?v=0.1.1'
   ];
 
   for (const source of modules) {
