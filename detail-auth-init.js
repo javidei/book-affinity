@@ -129,6 +129,7 @@ function updateAuthButton() {
   const identity = username ? `@${username}` : (state.user?.email || 'usuario');
   elements.authButton.textContent = state.user ? 'Mi cuenta' : 'Entrar';
   elements.authButton.title = state.user ? `Gestionar ${identity}` : 'Iniciar sesión';
+  window.refreshConnectedUserUi?.();
 }
 
 function bindEvents() {
@@ -165,7 +166,7 @@ function bindEvents() {
 
 async function initialize() {
   document.querySelector('#year').textContent = new Date().getFullYear();
-  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.4.0'} · ${config.webReleaseDate || '05/08/2026'}`;
+  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.4.2'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
 
   if (!supabaseClient) {
