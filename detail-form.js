@@ -213,7 +213,7 @@ async function saveChanges(event) {
     });
     renderBook();
     elements.editPanel.hidden = true;
-    showToast('Cambios aplicados en la demostración.');
+    showSaveConfirmation('Los cambios se han guardado correctamente en la demostración.');
     return;
   }
 
@@ -270,7 +270,10 @@ async function saveChanges(event) {
   await refreshDetailHistory();
   renderBook();
   elements.editPanel.hidden = true;
-  showToast(warning || 'Ficha actualizada.');
+  showSaveConfirmation(
+    warning || 'Los cambios de la ficha se han guardado correctamente.',
+    { warning: Boolean(warning) }
+  );
 }
 
 async function deleteBook() {
