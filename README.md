@@ -16,31 +16,25 @@ Aplicación web personal para organizar lecturas, buscar libros, registrar el pr
 
 ## 1. Crear las tablas en Supabase
 
-1. Abre el proyecto de Supabase que ya utilizas para tus proyectos.
+1. Abre el proyecto de Supabase que ya utilizas para SAM y el resto de proyectos.
 2. Entra en **SQL Editor**.
 3. Ejecuta completo el archivo [`supabase/schema.sql`](supabase/schema.sql).
 4. En **Authentication > Providers > Email**, mantén activo el acceso por correo y contraseña.
-5. Decide si quieres exigir confirmación por correo al registrar cuentas.
+5. En **Authentication > URL Configuration**, añade `https://javidei.github.io/book-affinity/` como URL permitida si vas a usar confirmación por correo.
 
 El script crea las tablas `books` y `reading_updates`, índices, porcentaje generado, triggers y políticas RLS.
 
-## 2. Configurar la web
+## 2. Conexiones
 
-Edita `config.js`:
+`config.js` ya contiene:
 
-```js
-window.BOOK_AFFINITY_CONFIG = Object.freeze({
-  supabaseUrl: 'https://TU-PROYECTO.supabase.co',
-  supabasePublishableKey: 'TU_CLAVE_PUBLICABLE',
-  googleBooksApiKey: 'TU_CLAVE_DE_GOOGLE_BOOKS',
-  webVersion: '0.1.0',
-  webReleaseDate: '05/08/2026'
-});
-```
+- La URL y la clave **publicable** del proyecto de Supabase utilizado por SAM.
+- La conexión de Google Books utilizada por Stilton.
+- La versión `0.1.0` y la fecha `05/08/2026`.
 
-La clave publicable de Supabase se puede exponer en una web estática. **No uses nunca `service_role` en el navegador.**
+La clave publicable de Supabase puede exponerse en una web estática porque la seguridad real la aplican las políticas RLS. **No uses nunca `service_role` en el navegador.**
 
-Para Google Books, crea una API key en Google Cloud y restríngela al dominio de GitHub Pages. Mientras no añadas las claves, la interfaz funciona en modo demostración con libros de ejemplo.
+Conviene restringir la clave de Google Books al dominio de GitHub Pages desde Google Cloud.
 
 ## 3. Publicar en GitHub Pages
 
@@ -59,10 +53,13 @@ La URL prevista será:
 
 - `index.html`: panel principal, biblioteca, buscador y formularios.
 - `book.html`: ficha de detalle del libro.
-- `app.js`: biblioteca, búsqueda, formulario y autenticación.
-- `detail.js`: detalle, historial, edición y eliminación.
-- `styles.css`: diseño responsive y componentes UX.
-- `config.js`: claves públicas y versionado.
+- `app.js`: punto de entrada de la aplicación.
+- `app-*.js`: biblioteca, formularios, buscador y autenticación.
+- `detail.js`: punto de entrada de la ficha.
+- `detail-*.js`: detalle, historial, edición y autenticación.
+- `styles.css`: punto de entrada de estilos.
+- `styles-*.css`: estilos principales, componentes y responsive.
+- `config.js`: conexiones públicas y versionado.
 - `assets/`: identidad visual e ilustraciones.
 - `supabase/schema.sql`: base de datos y seguridad.
 - `CHANGELOG.md`: historial de versiones.
