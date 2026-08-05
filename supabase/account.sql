@@ -1,5 +1,5 @@
 -- Book Affinity · perfiles y nombres de usuario
--- Migración 0.4.1 · 05/08/2026
+-- Migración 0.4.2 · 05/08/2026
 -- Ejecuta este archivo completo en Supabase > SQL Editor.
 -- Es seguro volver a ejecutarlo y no modifica la tabla genérica public.profiles.
 
@@ -85,6 +85,11 @@ using ((select auth.uid()) = user_id);
 -- El navegador solo puede leer el perfil propio. Los cambios pasan por una función segura.
 revoke all on table public.book_affinity_profiles from anon, authenticated;
 grant select on table public.book_affinity_profiles to authenticated;
+
+-- La Edge Function usa una clave secreta que actúa como service_role.
+-- El rol omite RLS, pero necesita permiso SQL explícito sobre la tabla.
+grant usage on schema public to service_role;
+grant select on table public.book_affinity_profiles to service_role;
 
 create or replace function public.book_affinity_check_username_available(p_username text)
 returns boolean
