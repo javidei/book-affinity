@@ -1,5 +1,5 @@
--- Book Affinity · esquema inicial para Supabase
--- Versión 0.1.0 · 05/08/2026
+-- Book Affinity · esquema para Supabase
+-- Versión 0.2.0 · 05/08/2026
 -- Ejecuta el script completo en Supabase > SQL Editor.
 
 create extension if not exists pgcrypto;
@@ -15,6 +15,7 @@ create table if not exists public.books (
   notes text,
   cover_url text,
   thumbnail_url text,
+  cover_path text,
   isbn_10 text,
   isbn_13 text,
   publisher text,
@@ -39,6 +40,9 @@ create table if not exists public.books (
   constraint books_page_progress_check check (page_count is null or current_page <= page_count),
   constraint books_finished_dates_check check (finished_at is null or started_at is null or finished_at >= started_at)
 );
+
+-- Para proyectos que ya ejecutaron la versión 0.1.x.
+alter table public.books add column if not exists cover_path text;
 
 create unique index if not exists books_user_google_id_unique
   on public.books (user_id, google_books_id)
@@ -108,70 +112,98 @@ alter table public.books enable row level security;
 alter table public.reading_updates enable row level security;
 
 drop policy if exists "books_select_own" on public.books;
-create policy "books_select_own"
-on public.books
-for select
-to authenticated
+create policy "books_select_own" on public.books for select to authenticated
 using ((select auth.uid()) = user_id);
 
 drop policy if exists "books_insert_own" on public.books;
-create policy "books_insert_own"
-on public.books
-for insert
-to authenticated
+create policy "books_insert_own" on public.books for insert to authenticated
 with check ((select auth.uid()) = user_id);
 
 drop policy if exists "books_update_own" on public.books;
-create policy "books_update_own"
-on public.books
-for update
-to authenticated
+create policy "books_update_own" on public.books for update to authenticated
 using ((select auth.uid()) = user_id)
 with check ((select auth.uid()) = user_id);
 
 drop policy if exists "books_delete_own" on public.books;
-create policy "books_delete_own"
-on public.books
-for delete
-to authenticated
+create policy "books_delete_own" on public.books for delete to authenticated
 using ((select auth.uid()) = user_id);
 
 drop policy if exists "reading_updates_select_own" on public.reading_updates;
-create policy "reading_updates_select_own"
-on public.reading_updates
-for select
-to authenticated
+create policy "reading_updates_select_own" on public.reading_updates for select to authenticated
 using ((select auth.uid()) = user_id);
 
 drop policy if exists "reading_updates_insert_own" on public.reading_updates;
-create policy "reading_updates_insert_own"
-on public.reading_updates
-for insert
-to authenticated
+create policy "reading_updates_insert_own" on public.reading_updates for insert to authenticated
 with check (
   (select auth.uid()) = user_id
   and exists (
-    select 1
-    from public.books
+    select 1 from public.books
     where books.id = reading_updates.book_id
       and books.user_id = (select auth.uid())
   )
 );
 
 drop policy if exists "reading_updates_delete_own" on public.reading_updates;
-create policy "reading_updates_delete_own"
-on public.reading_updates
-for delete
-to authenticated
+create policy "reading_updates_delete_own" on public.reading_updates for delete to authenticated
 using ((select auth.uid()) = user_id);
 
 revoke all on table public.books from anon;
 revoke all on table public.reading_updates from anon;
-
 grant select, insert, update, delete on table public.books to authenticated;
 grant select, insert, delete on table public.reading_updates to authenticated;
 grant usage, select on sequence public.reading_updates_id_seq to authenticated;
 
+-- Bucket público para portadas. Solo su propietario puede subir, sustituir o borrar archivos.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'book-covers',
+  'book-covers',
+  true,
+  5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "book_covers_select_own" on storage.objects;
+create policy "book_covers_select_own"
+on storage.objects for select to authenticated
+using (
+  bucket_id = 'book-covers'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "book_covers_insert_own" on storage.objects;
+create policy "book_covers_insert_own"
+on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'book-covers'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "book_covers_update_own" on storage.objects;
+create policy "book_covers_update_own"
+on storage.objects for update to authenticated
+using (
+  bucket_id = 'book-covers'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+)
+with check (
+  bucket_id = 'book-covers'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "book_covers_delete_own" on storage.objects;
+create policy "book_covers_delete_own"
+on storage.objects for delete to authenticated
+using (
+  bucket_id = 'book-covers'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
 comment on table public.books is 'Biblioteca personal de cada usuario de Book Affinity.';
 comment on table public.reading_updates is 'Historial automático de páginas y cambios de estado de lectura.';
 comment on column public.books.progress_percent is 'Porcentaje calculado automáticamente a partir de current_page y page_count.';
+comment on column public.books.cover_path is 'Ruta de la portada personalizada dentro del bucket book-covers.';
