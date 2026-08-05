@@ -1,12 +1,13 @@
 // Carga ordenada de los módulos clásicos de Book Affinity.
 (async () => {
   const modules = [
-    'app-core.js?v=0.2.3',
-    'save-popup.js?v=0.2.3',
-    'app-library.js?v=0.2.3',
-    'app-forms.js?v=0.2.3',
-    'app-search.js?v=0.2.3',
-    'app-auth-init.js?v=0.2.3'
+    'ui-shell.js?v=0.3.0',
+    'app-core.js?v=0.3.0',
+    'save-popup.js?v=0.3.0',
+    'app-library.js?v=0.3.0',
+    'app-forms.js?v=0.3.0',
+    'app-search.js?v=0.3.0',
+    'app-auth-init.js?v=0.3.0'
   ];
   for (const source of modules) {
     await new Promise((resolve, reject) => {
