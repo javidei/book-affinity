@@ -2,6 +2,13 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.2.2 — 05/08/2026
+
+- Añade un popup visual después de guardar o actualizar un libro.
+- Confirma de forma diferenciada los guardados correctos y los guardados con aviso de portada.
+- Incluye cierre mediante botón, clic exterior y tecla Escape.
+- Mejora la accesibilidad y el enfoque del mensaje de confirmación.
+
 ## 0.2.1 — 05/08/2026
 
 - Guarda primero los datos del libro y sube la portada después.
