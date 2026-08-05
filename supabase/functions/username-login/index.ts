@@ -40,13 +40,13 @@ Deno.serve(async request => {
     });
 
     const { data: profile, error: profileError } = await admin
-      .from('profiles')
+      .from('book_affinity_profiles')
       .select('user_id')
       .eq('username_normalized', identifier)
       .maybeSingle();
 
     if (profileError) {
-      console.error('No se pudo consultar el perfil.', profileError);
+      console.error('No se pudo consultar el perfil de Book Affinity.', profileError);
       return json({ error: 'El acceso por usuario todavía no está configurado.' }, 503);
     }
 
