@@ -21,40 +21,32 @@
   }
 
   function renderConnectedAccount(button, identity) {
-    const icons = document.createElement('span');
-    icons.className = 'account-header-button__icons';
-
-    const logo = document.createElement('img');
-    logo.className = 'account-header-button__logo';
-    logo.src = 'assets/logo.svg';
-    logo.alt = '';
-    logo.width = 34;
-    logo.height = 34;
-    icons.append(logo);
+    let avatarNode;
 
     if (identity.avatar) {
-      const avatar = document.createElement('img');
-      avatar.className = 'account-header-button__avatar';
-      avatar.src = identity.avatar.src;
-      avatar.alt = '';
-      avatar.width = 34;
-      avatar.height = 34;
-      icons.append(avatar);
+      avatarNode = document.createElement('img');
+      avatarNode.src = identity.avatar.src;
+      avatarNode.alt = '';
+      avatarNode.width = 38;
+      avatarNode.height = 38;
     } else {
-      const fallback = document.createElement('span');
-      fallback.className = 'account-header-button__avatar account-header-button__avatar--fallback';
-      fallback.textContent = identity.initial;
-      icons.append(fallback);
+      avatarNode = document.createElement('span');
+      avatarNode.textContent = identity.initial;
     }
+
+    avatarNode.className = `account-header-button__avatar${identity.avatar ? '' : ' account-header-button__avatar--fallback'}`;
 
     const copy = document.createElement('span');
     copy.className = 'account-header-button__copy';
+
     const caption = document.createElement('small');
     caption.textContent = 'Mi cuenta';
+
     const username = document.createElement('strong');
     username.textContent = identity.label;
+
     copy.append(caption, username);
-    button.replaceChildren(icons, copy);
+    button.replaceChildren(avatarNode, copy);
   }
 
   window.refreshConnectedUserUi = () => {
