@@ -2,6 +2,16 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.2.0 — 05/08/2026
+
+- Añade acceso mediante Google OAuth a la portada y a la ficha de libro.
+- Permite introducir el porcentaje de lectura y calcula la página aproximada.
+- Mantiene también el cálculo tradicional de páginas a porcentaje.
+- Añade subida y sustitución de portadas propias mediante Supabase Storage.
+- Crea el bucket `book-covers` y políticas de acceso por usuario.
+- Añade filtro específico de libros abandonados.
+- Garantiza que abandonados, pausados y pendientes no conserven fecha de finalización ni cuenten como terminados.
+
 ## 0.1.1 — 05/08/2026
 
 - Añade la URL correcta de retorno tras confirmar el correo.
