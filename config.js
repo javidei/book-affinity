@@ -6,6 +6,6 @@ window.BOOK_AFFINITY_CONFIG = Object.freeze({
   supabasePublishableKey: 'sb_publishable_eyFLhKFk9HXAab4q1cxG4A_-_la1-OI',
   googleBooksApiKey: 'AIzaSyB1ljgpeiX3ayIFHqpe2NqMWRvMwpOFcYg',
   siteUrl: 'https://javidei.github.io/book-affinity/',
-  webVersion: '0.4.0',
+  webVersion: '0.4.1',
   webReleaseDate: '05/08/2026'
 });
