@@ -177,6 +177,11 @@ function closeDialog(dialog) {
   document.body.classList.remove('has-modal');
 }
 
+function accountDisplayName() {
+  const username = window.bookAffinityProfile?.username;
+  return username ? `@${username}` : (state.user?.email || 'tu cuenta');
+}
+
 function updateConnectionState() {
   if (!elements.connectionState) return;
   elements.connectionState.classList.remove('is-success', 'is-warning');
@@ -188,7 +193,7 @@ function updateConnectionState() {
   }
 
   if (state.user) {
-    elements.connectionState.textContent = `Biblioteca sincronizada con Supabase · ${state.user.email}`;
+    elements.connectionState.textContent = `Biblioteca sincronizada con Supabase · ${accountDisplayName()}`;
     elements.connectionState.classList.add('is-success');
   } else {
     elements.connectionState.textContent = 'Supabase conectado · inicia sesión para ver y guardar tu biblioteca.';
@@ -198,6 +203,6 @@ function updateConnectionState() {
 
 function updateAuthButton() {
   if (!elements.authButton) return;
-  elements.authButton.textContent = state.user ? 'Salir' : 'Entrar';
-  elements.authButton.title = state.user ? `Sesión iniciada como ${state.user.email}` : 'Iniciar sesión';
+  elements.authButton.textContent = state.user ? 'Mi cuenta' : 'Entrar';
+  elements.authButton.title = state.user ? `Gestionar ${accountDisplayName()}` : 'Iniciar sesión';
 }
