@@ -17,6 +17,14 @@ function showDetailAuthError(error) {
   elements.authMessage.className = 'form-message is-error';
 }
 
+function showDetailAuthConfirmation(options) {
+  if (typeof window.showConfirmationPopup === 'function') {
+    window.showConfirmationPopup(options);
+    return;
+  }
+  showToast(options.message || options.title || 'Operación completada.');
+}
+
 async function signIn(event) {
   event.preventDefault();
   if (!configured) {
@@ -26,6 +34,8 @@ async function signIn(event) {
 
   const email = document.querySelector('#auth-email').value.trim();
   const password = document.querySelector('#auth-password').value;
+  let confirmation = null;
+
   elements.authMessage.textContent = 'Iniciando sesión…';
   elements.authMessage.className = 'form-message';
   setDetailAuthOperation(true, 'Iniciando sesión…', 'Estamos cargando la ficha de tu biblioteca.');
@@ -44,17 +54,29 @@ async function signIn(event) {
     elements.loading.hidden = false;
     elements.loading.textContent = 'Cargando ficha del libro…';
     await loadBook();
-    showToast('Sesión iniciada.');
+    elements.authMessage.textContent = '';
+    confirmation = {
+      eyebrow: 'Sesión iniciada',
+      title: 'Bienvenido',
+      message: `Has iniciado sesión como ${state.user?.email || email}. Ya puedes consultar y editar tu biblioteca privada.`,
+      icon: '✓',
+      variant: 'success',
+      buttonLabel: 'Continuar'
+    };
   } catch (error) {
     showDetailAuthError(error);
   } finally {
     setDetailAuthOperation(false);
   }
+
+  if (confirmation) showDetailAuthConfirmation(confirmation);
 }
 
 async function handleAuthButton() {
   if (state.user && supabaseClient) {
+    let confirmation = null;
     setDetailAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
+
     try {
       const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
       if (error) {
@@ -68,12 +90,21 @@ async function handleAuthButton() {
       elements.loading.hidden = false;
       elements.loading.textContent = 'Cerrando la ficha privada…';
       await loadBook();
-      showToast('Sesión cerrada.');
+      confirmation = {
+        eyebrow: 'Sesión cerrada',
+        title: 'Hasta pronto',
+        message: 'La sesión se ha cerrado correctamente y tu biblioteca privada vuelve a estar protegida.',
+        icon: '✓',
+        variant: 'neutral',
+        buttonLabel: 'Aceptar'
+      };
     } catch (error) {
       showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
     } finally {
       setDetailAuthOperation(false);
     }
+
+    if (confirmation) showDetailAuthConfirmation(confirmation);
     return;
   }
 
@@ -121,7 +152,7 @@ function bindEvents() {
 
 async function initialize() {
   document.querySelector('#year').textContent = new Date().getFullYear();
-  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.1'} · ${config.webReleaseDate || '05/08/2026'}`;
+  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.2'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
 
   if (!supabaseClient) {
