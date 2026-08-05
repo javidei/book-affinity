@@ -5,6 +5,6 @@ window.BOOK_AFFINITY_CONFIG = Object.freeze({
   supabaseUrl: 'https://avboupigkstzprrgvlhr.supabase.co',
   supabasePublishableKey: 'sb_publishable_eyFLhKFk9HXAab4q1cxG4A_-_la1-OI',
   googleBooksApiKey: 'AIzaSyB1ljgpeiX3ayIFHqpe2NqMWRvMwpOFcYg',
-  webVersion: '0.2.0',
+  webVersion: '0.2.1',
   webReleaseDate: '05/08/2026'
 });
