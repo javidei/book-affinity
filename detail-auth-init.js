@@ -2,8 +2,9 @@ let authOperationInProgress = false;
 
 function detailAuthErrorMessage(error) {
   const message = String(error?.message || error || '').toLowerCase();
-  if (message.includes('invalid login credentials')) return 'Correo o contraseña incorrectos.';
+  if (message.includes('invalid login credentials') || message.includes('usuario o contraseña incorrectos')) return 'Usuario, correo o contraseña incorrectos.';
   if (message.includes('email not confirmed')) return 'Tu correo todavía no está confirmado.';
+  if (message.includes('function') || message.includes('username-login') || message.includes('configured')) return 'El acceso por usuario todavía no está desplegado en Supabase. Puedes entrar con el correo.';
   return error?.message || String(error || 'No se ha podido iniciar sesión.');
 }
 
@@ -18,11 +19,8 @@ function showDetailAuthError(error) {
 }
 
 function showDetailAuthConfirmation(options) {
-  if (typeof window.showConfirmationPopup === 'function') {
-    window.showConfirmationPopup(options);
-    return;
-  }
-  showToast(options.message || options.title || 'Operación completada.');
+  if (typeof window.showConfirmationPopup === 'function') window.showConfirmationPopup(options);
+  else showToast(options.message || options.title || 'Operación completada.');
 }
 
 async function signIn(event) {
@@ -32,33 +30,38 @@ async function signIn(event) {
     return;
   }
 
-  const email = document.querySelector('#auth-email').value.trim();
+  const identifier = document.querySelector('#auth-email').value.trim();
   const password = document.querySelector('#auth-password').value;
   let confirmation = null;
+
+  if (!identifier || !password) {
+    showDetailAuthError('Escribe tu correo o usuario y la contraseña.');
+    return;
+  }
 
   elements.authMessage.textContent = 'Iniciando sesión…';
   elements.authMessage.className = 'form-message';
   setDetailAuthOperation(true, 'Iniciando sesión…', 'Estamos cargando la ficha de tu biblioteca.');
 
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { data, error } = await window.bookAffinitySignIn(identifier, password);
     if (error) {
       showDetailAuthError(error);
       return;
     }
 
     state.user = data.session?.user || data.user || null;
+    await window.loadAccountProfile?.();
     updateAuthButton();
     closeDialog(elements.authDialog);
     elements.detail.hidden = true;
     elements.loading.hidden = false;
     elements.loading.textContent = 'Cargando ficha del libro…';
     await loadBook();
-    elements.authMessage.textContent = '';
     confirmation = {
       eyebrow: 'Sesión iniciada',
       title: 'Bienvenido',
-      message: `Has iniciado sesión como ${state.user?.email || email}. Ya puedes consultar y editar tu biblioteca privada.`,
+      message: `Has iniciado sesión como ${window.bookAffinityProfile?.username ? `@${window.bookAffinityProfile.username}` : state.user?.email || identifier}.`,
       icon: '✓',
       variant: 'success',
       buttonLabel: 'Continuar'
@@ -72,39 +75,47 @@ async function signIn(event) {
   if (confirmation) showDetailAuthConfirmation(confirmation);
 }
 
-async function handleAuthButton() {
-  if (state.user && supabaseClient) {
-    let confirmation = null;
-    setDetailAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
+async function performDetailSignOut() {
+  if (!state.user || !supabaseClient) return;
+  let confirmation = null;
+  setDetailAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
 
-    try {
-      const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
-      if (error) {
-        showToast(`No se pudo cerrar la sesión: ${error.message}`);
-        return;
-      }
-
-      state.user = null;
-      updateAuthButton();
-      elements.detail.hidden = true;
-      elements.loading.hidden = false;
-      elements.loading.textContent = 'Cerrando la ficha privada…';
-      await loadBook();
-      confirmation = {
-        eyebrow: 'Sesión cerrada',
-        title: 'Hasta pronto',
-        message: 'La sesión se ha cerrado correctamente y tu biblioteca privada vuelve a estar protegida.',
-        icon: '✓',
-        variant: 'neutral',
-        buttonLabel: 'Aceptar'
-      };
-    } catch (error) {
-      showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
-    } finally {
-      setDetailAuthOperation(false);
+  try {
+    const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+    if (error) {
+      showToast(`No se pudo cerrar la sesión: ${error.message}`);
+      return;
     }
 
-    if (confirmation) showDetailAuthConfirmation(confirmation);
+    state.user = null;
+    window.bookAffinityProfile = null;
+    updateAuthButton();
+    elements.detail.hidden = true;
+    elements.loading.hidden = false;
+    elements.loading.textContent = 'Cerrando la ficha privada…';
+    await loadBook();
+    confirmation = {
+      eyebrow: 'Sesión cerrada',
+      title: 'Hasta pronto',
+      message: 'La sesión se ha cerrado correctamente y tu biblioteca privada vuelve a estar protegida.',
+      icon: '✓',
+      variant: 'neutral',
+      buttonLabel: 'Aceptar'
+    };
+  } catch (error) {
+    showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
+  } finally {
+    setDetailAuthOperation(false);
+  }
+
+  if (confirmation) showDetailAuthConfirmation(confirmation);
+}
+
+window.bookAffinitySignOut = performDetailSignOut;
+
+async function handleAuthButton() {
+  if (state.user) {
+    await window.openAccountDialog?.();
     return;
   }
 
@@ -114,8 +125,10 @@ async function handleAuthButton() {
 }
 
 function updateAuthButton() {
-  elements.authButton.textContent = state.user ? 'Salir' : 'Entrar';
-  elements.authButton.title = state.user ? `Sesión iniciada como ${state.user.email || 'usuario'}` : 'Iniciar sesión';
+  const username = window.bookAffinityProfile?.username;
+  const identity = username ? `@${username}` : (state.user?.email || 'usuario');
+  elements.authButton.textContent = state.user ? 'Mi cuenta' : 'Entrar';
+  elements.authButton.title = state.user ? `Gestionar ${identity}` : 'Iniciar sesión';
 }
 
 function bindEvents() {
@@ -152,7 +165,7 @@ function bindEvents() {
 
 async function initialize() {
   document.querySelector('#year').textContent = new Date().getFullYear();
-  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.2'} · ${config.webReleaseDate || '05/08/2026'}`;
+  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.4.0'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
 
   if (!supabaseClient) {
@@ -163,20 +176,27 @@ async function initialize() {
 
   const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
+  if (state.user) await window.loadAccountProfile?.();
   updateAuthButton();
   await loadBook();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     state.user = session?.user || null;
-    updateAuthButton();
-    if (event === 'SIGNED_IN') closeDialog(elements.authDialog);
+    if (!state.user) window.bookAffinityProfile = null;
 
-    if (!authOperationInProgress) {
-      elements.detail.hidden = true;
-      elements.loading.hidden = false;
-      elements.loading.textContent = 'Cargando ficha del libro…';
-      loadBook();
-    }
+    const refreshUi = () => {
+      updateAuthButton();
+      if (event === 'SIGNED_IN') closeDialog(elements.authDialog);
+      if (!authOperationInProgress) {
+        elements.detail.hidden = true;
+        elements.loading.hidden = false;
+        elements.loading.textContent = 'Cargando ficha del libro…';
+        loadBook();
+      }
+    };
+
+    if (state.user) window.loadAccountProfile?.().finally(refreshUi);
+    else refreshUi();
   });
 }
 
