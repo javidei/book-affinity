@@ -34,8 +34,134 @@
     return message || 'No se pudo completar la operación.';
   }
 
+  function getConnectedIdentity() {
+    const username = String(window.bookAffinityProfile?.username || '').trim();
+    const email = String(state?.user?.email || '').trim();
+    const rawName = username || email.split('@')[0] || 'usuario';
+    return {
+      username,
+      email,
+      label: username ? `@${username}` : (email || 'Cuenta conectada'),
+      initial: rawName.charAt(0).toUpperCase() || 'U'
+    };
+  }
+
   function closeAccountDialog(dialog) {
     if (typeof closeDialog === 'function') closeDialog(dialog);
+  }
+
+  function ensureSessionBadge() {
+    let badge = document.querySelector('#session-user-badge');
+    if (badge) return badge;
+
+    const nav = document.querySelector('.site-nav');
+    const authButton = document.querySelector('#auth-button');
+    if (!nav) return null;
+
+    badge = document.createElement('button');
+    badge.id = 'session-user-badge';
+    badge.className = 'session-user-badge';
+    badge.type = 'button';
+    badge.hidden = true;
+    badge.innerHTML = `
+      <span class="session-user-badge__avatar" aria-hidden="true">U</span>
+      <span class="session-user-badge__copy">
+        <small>Sesión activa</small>
+        <strong>Cuenta conectada</strong>
+      </span>`;
+    badge.addEventListener('click', () => window.openAccountDialog?.());
+
+    if (authButton?.parentElement === nav) nav.insertBefore(badge, authButton);
+    else nav.append(badge);
+    return badge;
+  }
+
+  window.refreshConnectedUserUi = () => {
+    const badge = ensureSessionBadge();
+    if (!badge) return;
+
+    const connected = Boolean(state?.user);
+    badge.hidden = !connected;
+    if (!connected) return;
+
+    const identity = getConnectedIdentity();
+    const avatar = badge.querySelector('.session-user-badge__avatar');
+    const label = badge.querySelector('.session-user-badge__copy strong');
+    if (avatar) avatar.textContent = identity.initial;
+    if (label) label.textContent = identity.label;
+    badge.title = `Sesión iniciada como ${identity.label}. Abrir Mi cuenta.`;
+    badge.setAttribute('aria-label', badge.title);
+  };
+
+  function fillAccountIdentity(dialog) {
+    const identity = getConnectedIdentity();
+    const avatar = dialog.querySelector('#account-avatar');
+    const displayName = dialog.querySelector('#account-display-name');
+    const email = dialog.querySelector('#account-email');
+    if (avatar) avatar.textContent = identity.initial;
+    if (displayName) displayName.textContent = identity.label;
+    if (email) email.textContent = identity.email || 'Cuenta de Supabase';
+  }
+
+  function ensureSignOutDialog() {
+    let dialog = document.querySelector('#signout-confirm-dialog');
+    if (dialog) return dialog;
+
+    dialog = document.createElement('dialog');
+    dialog.id = 'signout-confirm-dialog';
+    dialog.className = 'modal signout-confirmation';
+    dialog.setAttribute('aria-labelledby', 'signout-confirm-title');
+    dialog.setAttribute('aria-describedby', 'signout-confirm-message');
+    dialog.innerHTML = `
+      <div class="dialog-card dialog-card--confirmation">
+        <div class="signout-confirmation__icon" aria-hidden="true">↪</div>
+        <p class="eyebrow eyebrow--dark">Proteger biblioteca</p>
+        <h2 id="signout-confirm-title">¿Cerrar sesión?</h2>
+        <p id="signout-confirm-message">Vas a cerrar la sesión de esta cuenta.</p>
+        <div class="signout-confirmation__identity" id="signout-confirm-identity"></div>
+        <div class="dialog-actions dialog-actions--center signout-confirmation__actions">
+          <button class="button button--secondary" id="signout-cancel" type="button">Seguir conectado</button>
+          <button class="button button--danger" id="signout-confirm" type="button">Sí, cerrar sesión</button>
+        </div>
+      </div>`;
+
+    const close = () => closeAccountDialog(dialog);
+    dialog.querySelector('#signout-cancel')?.addEventListener('click', close);
+    dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      close();
+    });
+    dialog.addEventListener('close', () => document.body.classList.remove('has-modal'));
+    dialog.querySelector('#signout-confirm')?.addEventListener('click', async event => {
+      const confirmButton = event.currentTarget;
+      const cancelButton = dialog.querySelector('#signout-cancel');
+      confirmButton.disabled = true;
+      if (cancelButton) cancelButton.disabled = true;
+      close();
+      try {
+        await window.bookAffinitySignOut?.();
+      } finally {
+        confirmButton.disabled = false;
+        if (cancelButton) cancelButton.disabled = false;
+      }
+    });
+
+    document.body.append(dialog);
+    return dialog;
+  }
+
+  function openSignOutConfirmation() {
+    const accountDialog = document.querySelector('#account-dialog');
+    if (accountDialog?.open) closeAccountDialog(accountDialog);
+
+    const dialog = ensureSignOutDialog();
+    const identity = getConnectedIdentity();
+    const identityNode = dialog.querySelector('#signout-confirm-identity');
+    if (identityNode) identityNode.textContent = identity.label;
+
+    if (typeof showDialog === 'function') showDialog(dialog);
+    window.setTimeout(() => dialog.querySelector('#signout-cancel')?.focus(), 50);
   }
 
   function ensureAccountDialog() {
@@ -54,8 +180,12 @@
         </div>
 
         <div class="account-identity">
-          <span>Correo vinculado</span>
-          <strong id="account-email">—</strong>
+          <span class="account-identity__avatar" id="account-avatar" aria-hidden="true">U</span>
+          <div class="account-identity__copy">
+            <span>Sesión activa</span>
+            <strong id="account-display-name">Cuenta conectada</strong>
+            <small id="account-email">—</small>
+          </div>
         </div>
 
         <section class="account-section" aria-labelledby="username-title">
@@ -81,7 +211,14 @@
           </form>
         </section>
 
-        <div class="account-footer-actions"><button class="button button--danger" id="account-signout" type="button">Cerrar sesión</button></div>
+        <section class="account-signout-panel" aria-labelledby="account-signout-title">
+          <span class="account-signout-panel__icon" aria-hidden="true">↪</span>
+          <div>
+            <h3 id="account-signout-title">Cerrar sesión</h3>
+            <p>Protege tu biblioteca y elimina la sesión de este dispositivo.</p>
+          </div>
+          <button class="button button--danger" id="account-signout" type="button">Cerrar sesión</button>
+        </section>
       </div>`;
 
     const close = () => closeAccountDialog(dialog);
@@ -91,10 +228,7 @@
     dialog.querySelector('#username-form')?.addEventListener('submit', saveUsername);
     dialog.querySelector('#password-form')?.addEventListener('submit', changePassword);
     dialog.querySelector('#account-username')?.addEventListener('input', scheduleUsernameCheck);
-    dialog.querySelector('#account-signout')?.addEventListener('click', async () => {
-      close();
-      await window.bookAffinitySignOut?.();
-    });
+    dialog.querySelector('#account-signout')?.addEventListener('click', openSignOutConfirmation);
 
     document.body.append(dialog);
     return dialog;
@@ -150,6 +284,7 @@
   window.loadAccountProfile = async () => {
     if (!state?.user || !supabaseClient) {
       window.bookAffinityProfile = null;
+      window.refreshConnectedUserUi?.();
       return null;
     }
 
@@ -162,10 +297,12 @@
     if (error) {
       console.warn('No se pudo cargar el perfil. Ejecuta supabase/account.sql.', error);
       window.bookAffinityProfile = null;
+      window.refreshConnectedUserUi?.();
       return null;
     }
 
     window.bookAffinityProfile = data || { username: null };
+    window.refreshConnectedUserUi?.();
     return window.bookAffinityProfile;
   };
 
@@ -209,6 +346,7 @@
     if (result.error) return setUsernameStatus(accountErrorMessage(result.error), 'error');
 
     window.bookAffinityProfile = { username: result.data?.username || username };
+    window.refreshConnectedUserUi?.();
     if (typeof updateConnectionState === 'function') updateConnectionState();
     if (typeof updateAuthButton === 'function') updateAuthButton();
     closeAccountDialog(dialog);
@@ -279,12 +417,13 @@
     if (!state?.user) return;
     const dialog = ensureAccountDialog();
     const input = dialog.querySelector('#account-username');
-    dialog.querySelector('#account-email').textContent = state.user.email || 'Cuenta de Supabase';
+    fillAccountIdentity(dialog);
     dialog.querySelector('#username-status').textContent = 'Cargando perfil…';
     dialog.querySelector('#username-save').disabled = true;
     if (typeof showDialog === 'function') showDialog(dialog);
 
     await window.loadAccountProfile();
+    fillAccountIdentity(dialog);
     input.value = window.bookAffinityProfile?.username || '';
     setUsernameStatus(input.value ? 'Este es tu nombre de usuario actual.' : 'Todavía no has elegido un nombre de usuario.');
     window.setTimeout(() => input.focus(), 50);
@@ -301,6 +440,8 @@
       authInput.placeholder = 'Correo o nombre de usuario';
     }
     if (label) label.textContent = 'Correo o usuario';
+    ensureSessionBadge();
+    window.refreshConnectedUserUi?.();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeAccountUi, { once: true });
