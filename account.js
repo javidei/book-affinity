@@ -9,25 +9,29 @@
   function showPopup(options) {
     if (typeof window.showConfirmationPopup === 'function') {
       window.showConfirmationPopup(options);
-      return;
+    } else if (typeof showToast === 'function') {
+      showToast(options.message || options.title || 'Operación completada.');
     }
-    showToast?.(options.message || options.title || 'Operación completada.');
   }
 
   function accountErrorMessage(error) {
     const message = String(error?.message || error || '');
     const normalized = message.toLowerCase();
-    if (normalized.includes('username') && (normalized.includes('duplicate') || normalized.includes('unique') || normalized.includes('uso'))) {
+    if (error?.code === '23505' || normalized.includes('ya está en uso') || normalized.includes('duplicate') || normalized.includes('unique')) {
       return 'Ese nombre de usuario ya está en uso.';
     }
-    if (normalized.includes('invalid login credentials') || normalized.includes('current_password')) {
+    if (normalized.includes('invalid login credentials') || normalized.includes('current_password') || normalized.includes('current password')) {
       return 'La contraseña actual no es correcta.';
     }
     if (normalized.includes('weak password')) return 'La nueva contraseña no cumple los requisitos de seguridad.';
-    if (normalized.includes('could not find the function') || normalized.includes('schema cache')) {
+    if (normalized.includes('could not find the function') || normalized.includes('schema cache') || normalized.includes('relation "public.profiles"')) {
       return 'Falta ejecutar supabase/account.sql en Supabase.';
     }
     return message || 'No se pudo completar la operación.';
+  }
+
+  function closeAccountDialog(dialog) {
+    if (typeof closeDialog === 'function') closeDialog(dialog);
   }
 
   function ensureAccountDialog() {
@@ -41,10 +45,7 @@
     dialog.innerHTML = `
       <div class="dialog-card dialog-card--account">
         <div class="dialog-heading">
-          <div>
-            <p class="eyebrow eyebrow--dark">Cuenta personal</p>
-            <h2 id="account-title">Mi cuenta</h2>
-          </div>
+          <div><p class="eyebrow eyebrow--dark">Cuenta personal</p><h2 id="account-title">Mi cuenta</h2></div>
           <button class="icon-button" id="account-close" type="button" aria-label="Cerrar">×</button>
         </div>
 
@@ -57,15 +58,10 @@
           <h3 id="username-title">Nombre de usuario</h3>
           <p>Podrás usarlo en lugar del correo para iniciar sesión.</p>
           <form id="username-form">
-            <label class="field">
-              <span>Usuario</span>
-              <input id="account-username" type="text" minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ej. javi">
-            </label>
+            <label class="field"><span>Usuario</span><input id="account-username" type="text" minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Ej. javi"></label>
             <p class="account-hint">Entre 3 y 24 caracteres. Solo letras, números y guion bajo.</p>
             <p class="form-message account-status" id="username-status" aria-live="polite"></p>
-            <div class="dialog-actions">
-              <button class="button button--primary" id="username-save" type="submit" disabled>Guardar usuario</button>
-            </div>
+            <div class="dialog-actions"><button class="button button--primary" id="username-save" type="submit" disabled>Guardar usuario</button></div>
           </form>
         </section>
 
@@ -77,18 +73,14 @@
             <label class="field"><span>Nueva contraseña</span><input id="new-password" type="password" autocomplete="new-password" minlength="8" required></label>
             <label class="field"><span>Repetir nueva contraseña</span><input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required></label>
             <p class="form-message" id="password-status" aria-live="polite"></p>
-            <div class="dialog-actions">
-              <button class="button button--primary" type="submit">Cambiar contraseña</button>
-            </div>
+            <div class="dialog-actions"><button class="button button--primary" type="submit">Cambiar contraseña</button></div>
           </form>
         </section>
 
-        <div class="account-footer-actions">
-          <button class="button button--danger" id="account-signout" type="button">Cerrar sesión</button>
-        </div>
+        <div class="account-footer-actions"><button class="button button--danger" id="account-signout" type="button">Cerrar sesión</button></div>
       </div>`;
 
-    const close = () => closeDialog?.(dialog);
+    const close = () => closeAccountDialog(dialog);
     dialog.querySelector('#account-close')?.addEventListener('click', close);
     dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
     dialog.addEventListener('close', () => document.body.classList.remove('has-modal'));
@@ -104,13 +96,13 @@
     return dialog;
   }
 
-  function setUsernameStatus(message, state = '') {
+  function setUsernameStatus(message, statusName = '') {
     const dialog = ensureAccountDialog();
     const status = dialog.querySelector('#username-status');
     const save = dialog.querySelector('#username-save');
     status.textContent = message;
-    status.className = `form-message account-status${state ? ` is-${state}` : ''}`;
-    save.disabled = state !== 'success';
+    status.className = `form-message account-status${statusName ? ` is-${statusName}` : ''}`;
+    save.disabled = statusName !== 'success';
   }
 
   async function readFunctionError(error) {
@@ -120,7 +112,7 @@
         return body?.error || body?.message || error.message;
       }
     } catch (_) {
-      // El cuerpo de error puede no ser JSON.
+      // La respuesta puede no incluir JSON.
     }
     return error?.message || 'No se pudo iniciar sesión con ese usuario.';
   }
@@ -140,21 +132,15 @@
       body: { identifier: username, password }
     });
 
-    if (error) {
-      const message = await readFunctionError(error);
-      return { data: null, error: new Error(message) };
-    }
-
+    if (error) return { data: null, error: new Error(await readFunctionError(error)) };
     if (!data?.access_token || !data?.refresh_token) {
       return { data: null, error: new Error(data?.error || 'El acceso por usuario todavía no está configurado.') };
     }
 
-    const sessionResult = await supabaseClient.auth.setSession({
+    return supabaseClient.auth.setSession({
       access_token: data.access_token,
       refresh_token: data.refresh_token
     });
-
-    return sessionResult;
   };
 
   window.loadAccountProfile = async () => {
@@ -184,60 +170,44 @@
     const current = String(window.bookAffinityProfile?.username || '').toLowerCase();
     const requestId = ++availabilityRequest;
 
-    if (!username) {
-      setUsernameStatus('Escribe el usuario que quieres utilizar.');
-      return;
-    }
-    if (!USERNAME_PATTERN.test(username)) {
-      setUsernameStatus('Usa entre 3 y 24 letras, números o guiones bajos.', 'error');
-      return;
-    }
-    if (username === current) {
-      setUsernameStatus('Este es tu nombre de usuario actual.');
-      return;
-    }
+    if (!username) return setUsernameStatus('Escribe el usuario que quieres utilizar.');
+    if (!USERNAME_PATTERN.test(username)) return setUsernameStatus('Usa entre 3 y 24 letras, números o guiones bajos.', 'error');
+    if (username === current) return setUsernameStatus('Este es tu nombre de usuario actual.');
 
     setUsernameStatus('Comprobando disponibilidad…');
     const { data, error } = await supabaseClient.rpc('check_username_available', { p_username: username });
     if (requestId !== availabilityRequest) return;
-
-    if (error) {
-      setUsernameStatus(accountErrorMessage(error), 'error');
-      return;
-    }
-
+    if (error) return setUsernameStatus(accountErrorMessage(error), 'error');
     setUsernameStatus(data ? 'Usuario disponible.' : 'Ese usuario ya está en uso.', data ? 'success' : 'error');
   }
 
   function scheduleUsernameCheck(event) {
     window.clearTimeout(availabilityTimer);
-    const value = event.target.value;
-    availabilityTimer = window.setTimeout(() => checkUsernameAvailability(value), 350);
+    availabilityTimer = window.setTimeout(() => checkUsernameAvailability(event.target.value), 350);
   }
 
   async function saveUsername(event) {
     event.preventDefault();
     const dialog = ensureAccountDialog();
-    const input = dialog.querySelector('#account-username');
-    const username = input.value.trim().toLowerCase();
+    const username = dialog.querySelector('#account-username').value.trim().toLowerCase();
 
     await checkUsernameAvailability(username);
     if (dialog.querySelector('#username-save').disabled) return;
 
     window.setAppBusy?.(true, 'Guardando usuario…', 'Estamos comprobando que siga disponible.');
-    const { data, error } = await supabaseClient.rpc('set_my_username', { p_username: username });
-    window.setAppBusy?.(false);
-
-    if (error) {
-      setUsernameStatus(accountErrorMessage(error), 'error');
-      return;
+    let result;
+    try {
+      result = await supabaseClient.rpc('set_my_username', { p_username: username });
+    } finally {
+      window.setAppBusy?.(false);
     }
 
-    window.bookAffinityProfile = { username: data?.username || username };
-    setUsernameStatus('Usuario guardado correctamente.');
-    updateConnectionState?.();
-    updateAuthButton?.();
-    closeDialog?.(dialog);
+    if (result.error) return setUsernameStatus(accountErrorMessage(result.error), 'error');
+
+    window.bookAffinityProfile = { username: result.data?.username || username };
+    if (typeof updateConnectionState === 'function') updateConnectionState();
+    if (typeof updateAuthButton === 'function') updateAuthButton();
+    closeAccountDialog(dialog);
     showPopup({
       eyebrow: 'Usuario actualizado',
       title: `@${window.bookAffinityProfile.username}`,
@@ -276,20 +246,21 @@
     }
 
     window.setAppBusy?.(true, 'Cambiando contraseña…', 'Estamos verificando tu contraseña actual.');
-    const { error } = await supabaseClient.auth.updateUser({
-      password: next,
-      current_password: current
-    });
-    window.setAppBusy?.(false);
+    let result;
+    try {
+      result = await supabaseClient.auth.updateUser({ password: next, current_password: current });
+    } finally {
+      window.setAppBusy?.(false);
+    }
 
-    if (error) {
-      status.textContent = accountErrorMessage(error);
+    if (result.error) {
+      status.textContent = accountErrorMessage(result.error);
       status.classList.add('is-error');
       return;
     }
 
     dialog.querySelector('#password-form').reset();
-    closeDialog?.(dialog);
+    closeAccountDialog(dialog);
     showPopup({
       eyebrow: 'Seguridad actualizada',
       title: 'Contraseña cambiada',
@@ -303,15 +274,11 @@
   window.openAccountDialog = async () => {
     if (!state?.user) return;
     const dialog = ensureAccountDialog();
-    const email = dialog.querySelector('#account-email');
     const input = dialog.querySelector('#account-username');
-    const status = dialog.querySelector('#username-status');
-
-    email.textContent = state.user.email || 'Cuenta de Supabase';
-    status.textContent = 'Cargando perfil…';
-    status.className = 'form-message account-status';
+    dialog.querySelector('#account-email').textContent = state.user.email || 'Cuenta de Supabase';
+    dialog.querySelector('#username-status').textContent = 'Cargando perfil…';
     dialog.querySelector('#username-save').disabled = true;
-    showDialog?.(dialog);
+    if (typeof showDialog === 'function') showDialog(dialog);
 
     await window.loadAccountProfile();
     input.value = window.bookAffinityProfile?.username || '';
