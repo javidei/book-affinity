@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-labelledby="title desc">
+  <title id="title">Portada genérica</title>
+  <desc id="desc">Ilustración decorativa de una portada de libro</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#2c2234"/>
+      <stop offset="1" stop-color="#78599b"/>
+    </linearGradient>
+  </defs>
+  <rect width="360" height="520" rx="22" fill="url(#bg)"/>
+  <circle cx="180" cy="170" r="90" fill="#f0b86e" opacity=".16"/>
+  <path d="M82 154c39-13 73-5 98 18v162c-25-23-59-31-98-18V154Zm196 0c-39-13-73-5-98 18v162c25-23 59-31 98-18V154Z" fill="#fff4dc"/>
+  <path d="M180 172v162" stroke="#9f6fdd" stroke-width="8" stroke-linecap="round"/>
+  <text x="180" y="416" text-anchor="middle" fill="#fff4dc" font-family="Arial, sans-serif" font-size="24" font-weight="700">BOOK AFFINITY</text>
+  <text x="180" y="448" text-anchor="middle" fill="#fff4dc" opacity=".7" font-family="Arial, sans-serif" font-size="15">TU PRÓXIMA LECTURA</text>
+</svg>
