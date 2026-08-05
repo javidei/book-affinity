@@ -2,6 +2,23 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.4.2 — 05/08/2026
+
+- Muestra permanentemente en la cabecera la cuenta conectada mediante avatar y nombre de usuario.
+- Permite abrir **Mi cuenta** pulsando directamente sobre la identidad de sesión.
+- Rediseña la tarjeta de cuenta para destacar el usuario y el correo vinculados.
+- Convierte el cierre de sesión en una zona visual diferenciada y adaptada a móvil.
+- Añade una confirmación previa con las opciones **Seguir conectado** y **Sí, cerrar sesión**.
+- Conserva el popup final que confirma que la biblioteca ha quedado protegida.
+- Corrige las referencias antiguas de caché en `index.html` y `book.html`.
+
+## 0.4.1 — 05/08/2026
+
+- Aísla los perfiles en `book_affinity_profiles` para evitar conflictos con otros proyectos del mismo Supabase.
+- Repara instalaciones parciales de la tabla y sus columnas.
+- Actualiza la Edge Function para las claves publicables y secretas actuales de Supabase.
+- Añade permisos explícitos de lectura para el rol servidor.
+
 ## 0.4.0 — 05/08/2026
 
 - Añade una sección visual **Mi cuenta** dentro de la aplicación.
