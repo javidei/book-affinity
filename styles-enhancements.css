@@ -99,6 +99,61 @@
 }
 .dialog-actions--center { justify-content: center; }
 
+.account-dialog { width: min(94vw, 760px); }
+.dialog-card--account { padding: clamp(24px, 4vw, 36px); }
+.account-identity {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--paper-2);
+}
+.account-identity span {
+  color: var(--ink-soft);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.account-identity strong { overflow-wrap: anywhere; }
+.account-section {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--paper-2) 72%, transparent);
+}
+.account-section h3 {
+  margin: 0 0 5px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.45rem;
+}
+.account-section > p { margin: 0 0 12px; color: var(--ink-soft); }
+.account-hint { margin: 7px 0 0; color: var(--ink-soft); font-size: .83rem; }
+.account-status:not(:empty) {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--paper);
+  font-weight: 700;
+}
+.account-status.is-success {
+  border: 1px solid rgba(63,107,90,.3);
+  background: rgba(63,107,90,.1);
+}
+.account-status.is-error {
+  border: 1px solid rgba(155,56,68,.3);
+  background: rgba(155,56,68,.09);
+}
+.account-footer-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
 @media (max-width: 560px) {
   .cover-upload { grid-template-columns: 82px 1fr; gap: 12px; }
   .cover-upload img { width: 82px; height: 123px; }
@@ -113,4 +168,10 @@
     font-size: clamp(2rem, 11vw, 2.8rem);
   }
   .confirmation-popup #confirmation-message { font-size: .98rem; }
+  .dialog-card--account { padding: 22px 16px; }
+  .account-section { padding: 18px 14px; }
+  .account-section .dialog-actions,
+  .account-footer-actions { display: grid; }
+  .account-section .button,
+  .account-footer-actions .button { width: 100%; }
 }
