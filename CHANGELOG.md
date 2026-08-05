@@ -2,6 +2,15 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.3.2 — 05/08/2026
+
+- Añade popups visuales para cuenta creada, sesión iniciada y sesión cerrada.
+- Diferencia visualmente confirmaciones correctas, avisos informativos y cierre de sesión.
+- Muestra el correo de la cuenta dentro de las confirmaciones de acceso y registro.
+- Mejora tamaño, espaciado, legibilidad y adaptación móvil de los mensajes.
+- Mantiene los errores dentro del formulario, pero con un bloque más visible.
+- Añade un popup específico al reenviar el correo de confirmación.
+
 ## 0.3.1 — 05/08/2026
 
 - Retira temporalmente el acceso mediante Google de toda la interfaz y del código de autenticación.
