@@ -1,32 +1,39 @@
-// Popup compartido para confirmar guardados en Book Affinity.
+// Popup compartido para confirmaciones importantes de Book Affinity.
 (() => {
-  function ensureSaveDialog() {
-    let dialog = document.querySelector('#save-confirmation-dialog');
+  function syncModalState() {
+    const hasOpenDialog = Boolean(document.querySelector('dialog[open]'));
+    document.body.classList.toggle('has-modal', hasOpenDialog);
+  }
+
+  function ensureConfirmationDialog() {
+    let dialog = document.querySelector('#confirmation-dialog');
     if (dialog) return dialog;
 
     dialog = document.createElement('dialog');
-    dialog.id = 'save-confirmation-dialog';
-    dialog.className = 'modal save-confirmation';
-    dialog.setAttribute('aria-labelledby', 'save-confirmation-title');
-    dialog.setAttribute('aria-describedby', 'save-confirmation-message');
+    dialog.id = 'confirmation-dialog';
+    dialog.className = 'modal confirmation-popup';
+    dialog.setAttribute('aria-labelledby', 'confirmation-title');
+    dialog.setAttribute('aria-describedby', 'confirmation-message');
     dialog.innerHTML = `
       <div class="dialog-card dialog-card--confirmation">
-        <div class="save-confirmation__icon" aria-hidden="true">✓</div>
-        <p class="eyebrow eyebrow--dark">Cambios guardados</p>
-        <h2 id="save-confirmation-title">Guardado</h2>
-        <p id="save-confirmation-message">Los cambios se han guardado correctamente.</p>
+        <div class="confirmation-popup__icon" aria-hidden="true">✓</div>
+        <p class="eyebrow eyebrow--dark" id="confirmation-eyebrow">Operación completada</p>
+        <h2 id="confirmation-title">Listo</h2>
+        <p id="confirmation-message">La operación se ha completado correctamente.</p>
         <div class="dialog-actions dialog-actions--center">
-          <button class="button button--primary" id="save-confirmation-close" type="button">Aceptar</button>
+          <button class="button button--primary" id="confirmation-close" type="button">Aceptar</button>
         </div>
       </div>`;
 
     const close = () => {
       if (dialog.open && typeof dialog.close === 'function') dialog.close();
-      else dialog.removeAttribute('open');
-      document.body.classList.remove('has-modal');
+      else {
+        dialog.removeAttribute('open');
+        syncModalState();
+      }
     };
 
-    dialog.querySelector('#save-confirmation-close')?.addEventListener('click', close);
+    dialog.querySelector('#confirmation-close')?.addEventListener('click', close);
     dialog.addEventListener('click', event => {
       if (event.target === dialog) close();
     });
@@ -34,28 +41,59 @@
       event.preventDefault();
       close();
     });
-    dialog.addEventListener('close', () => document.body.classList.remove('has-modal'));
+    dialog.addEventListener('close', () => {
+      syncModalState();
+      const callback = dialog._confirmationOnClose;
+      dialog._confirmationOnClose = null;
+      if (typeof callback === 'function') callback();
+    });
+
     document.body.append(dialog);
     return dialog;
   }
 
-  window.showSaveConfirmation = (message = 'Los cambios se han guardado correctamente.', options = {}) => {
-    const dialog = ensureSaveDialog();
-    const warning = Boolean(options.warning);
-    const title = dialog.querySelector('#save-confirmation-title');
-    const messageNode = dialog.querySelector('#save-confirmation-message');
-    const icon = dialog.querySelector('.save-confirmation__icon');
+  window.showConfirmationPopup = (options = {}) => {
+    const {
+      eyebrow = 'Operación completada',
+      title = 'Listo',
+      message = 'La operación se ha completado correctamente.',
+      icon = '✓',
+      variant = 'success',
+      buttonLabel = 'Aceptar',
+      onClose = null
+    } = options;
 
-    dialog.classList.toggle('has-warning', warning);
-    if (title) title.textContent = warning ? 'Guardado con aviso' : 'Guardado';
+    const dialog = ensureConfirmationDialog();
+    const eyebrowNode = dialog.querySelector('#confirmation-eyebrow');
+    const titleNode = dialog.querySelector('#confirmation-title');
+    const messageNode = dialog.querySelector('#confirmation-message');
+    const iconNode = dialog.querySelector('.confirmation-popup__icon');
+    const closeButton = dialog.querySelector('#confirmation-close');
+
+    dialog.dataset.variant = variant;
+    dialog._confirmationOnClose = onClose;
+    if (eyebrowNode) eyebrowNode.textContent = eyebrow;
+    if (titleNode) titleNode.textContent = title;
     if (messageNode) messageNode.textContent = message;
-    if (icon) icon.textContent = warning ? '!' : '✓';
+    if (iconNode) iconNode.textContent = icon;
+    if (closeButton) closeButton.textContent = buttonLabel;
 
-    document.body.classList.add('has-modal');
     if (dialog.open && typeof dialog.close === 'function') dialog.close();
+    document.body.classList.add('has-modal');
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
 
-    window.setTimeout(() => dialog.querySelector('#save-confirmation-close')?.focus(), 50);
+    window.setTimeout(() => closeButton?.focus(), 50);
+  };
+
+  window.showSaveConfirmation = (message = 'Los cambios se han guardado correctamente.', options = {}) => {
+    const warning = Boolean(options.warning);
+    window.showConfirmationPopup({
+      eyebrow: warning ? 'Datos guardados con aviso' : 'Cambios guardados',
+      title: warning ? 'Guardado con aviso' : 'Guardado',
+      message,
+      icon: warning ? '!' : '✓',
+      variant: warning ? 'warning' : 'success'
+    });
   };
 })();
