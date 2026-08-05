@@ -2,6 +2,22 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.4.4 — 06/08/2026
+
+- Añade cinco avatares circulares y visualmente diferentes para las cuentas.
+- Incorpora un selector de icono dentro de **Mi cuenta**.
+- Guarda el avatar elegido en los metadatos del usuario de Supabase.
+- Mantiene la selección entre dispositivos y nuevos inicios de sesión.
+- Muestra el avatar personal junto al logo de Book Affinity y el nombre de usuario.
+- Incluye confirmación visual después de guardar el icono.
+
+## 0.4.3 — 05/08/2026
+
+- Convierte el modo noche en un botón circular situado fuera del menú.
+- Integra el logo de Book Affinity y el nombre de usuario en un único botón de cuenta.
+- Elimina la insignia de sesión independiente para evitar controles duplicados.
+- Mantiene la cabecera adaptada a móvil y escritorio.
+
 ## 0.4.2 — 05/08/2026
 
 - Muestra permanentemente en la cabecera la cuenta conectada mediante avatar y nombre de usuario.
