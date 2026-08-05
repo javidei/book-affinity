@@ -13,6 +13,27 @@
     document.querySelectorAll('#session-user-badge').forEach(node => node.remove());
   }
 
+  function renderConnectedAccount(button, identity) {
+    const logo = document.createElement('img');
+    logo.className = 'account-header-button__logo';
+    logo.src = 'assets/logo.svg';
+    logo.alt = '';
+    logo.width = 34;
+    logo.height = 34;
+
+    const copy = document.createElement('span');
+    copy.className = 'account-header-button__copy';
+
+    const caption = document.createElement('small');
+    caption.textContent = 'Mi cuenta';
+
+    const username = document.createElement('strong');
+    username.textContent = identity.label;
+
+    copy.append(caption, username);
+    button.replaceChildren(logo, copy);
+  }
+
   window.refreshConnectedUserUi = () => {
     removeLegacyBadge();
 
@@ -29,12 +50,7 @@
 
     const identity = connectedIdentity();
     button.className = 'account-header-button';
-    button.innerHTML = `
-      <img class="account-header-button__logo" src="assets/logo.svg" alt="" width="34" height="34">
-      <span class="account-header-button__copy">
-        <small>Mi cuenta</small>
-        <strong>${identity.label}</strong>
-      </span>`;
+    renderConnectedAccount(button, identity);
     button.title = `${identity.title}. Abrir Mi cuenta.`;
     button.setAttribute('aria-label', button.title);
   };
