@@ -132,9 +132,15 @@ async function initializeAuth() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function startApplication() {
   document.querySelector('#year').textContent = new Date().getFullYear();
   document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.1.0'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
   await initializeAuth();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApplication, { once: true });
+} else {
+  startApplication();
+}
