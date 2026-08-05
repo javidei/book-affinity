@@ -11,7 +11,7 @@
   function updateThemeButtons(theme) {
     document.querySelectorAll('[data-theme-toggle]').forEach(button => {
       const dark = theme === 'dark';
-      button.innerHTML = `<span aria-hidden="true">${dark ? '☀️' : '🌙'}</span> ${dark ? 'Modo día' : 'Modo noche'}`;
+      button.innerHTML = `<span aria-hidden="true">${dark ? '☀️' : '🌙'}</span>`;
       button.setAttribute('aria-label', dark ? 'Activar modo día' : 'Activar modo noche');
       button.setAttribute('aria-pressed', String(dark));
       button.title = dark ? 'Cambiar al modo claro' : 'Cambiar al modo oscuro';
@@ -27,19 +27,23 @@
   }
 
   function ensureThemeControls() {
-    document.querySelectorAll('.site-nav').forEach((nav, index) => {
-      if (nav.querySelector('[data-theme-toggle]')) return;
+    document.querySelectorAll('.site-header__inner').forEach((header, index) => {
+      if (header.querySelector('[data-theme-toggle]')) return;
+
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = 'nav-button nav-button--ghost theme-toggle';
+      button.className = 'theme-toggle theme-toggle--round';
       button.dataset.themeToggle = String(index);
       button.addEventListener('click', () => {
         const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
         applyTheme(next, true);
       });
-      const authButton = nav.querySelector('#auth-button');
-      nav.insertBefore(button, authButton || null);
+
+      const menuToggle = header.querySelector('.menu-toggle');
+      const nav = header.querySelector('.site-nav');
+      header.insertBefore(button, menuToggle || nav || null);
     });
+
     updateThemeButtons(document.documentElement.dataset.theme || preferredTheme());
   }
 
