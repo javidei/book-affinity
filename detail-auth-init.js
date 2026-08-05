@@ -80,4 +80,8 @@ async function initialize() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initialize);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize, { once: true });
+} else {
+  initialize();
+}
