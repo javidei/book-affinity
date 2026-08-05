@@ -2,6 +2,13 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.2.3 — 05/08/2026
+
+- Corrige el título del popup para evitar cortes de palabra.
+- Simplifica el encabezado principal a «Guardado».
+- Ajusta tamaño, ancho y espaciado en móvil y escritorio.
+- Mantiene una presentación diferenciada para guardados con aviso.
+
 ## 0.2.2 — 05/08/2026
 
 - Añade un popup visual después de guardar o actualizar un libro.
