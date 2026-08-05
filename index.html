@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.2.2">
+  <link rel="stylesheet" href="styles.css?v=0.3.1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="config.js?v=0.2.2" defer></script>
-  <script src="app.js?v=0.2.2" defer></script>
+  <script src="config.js?v=0.3.1" defer></script>
+  <script src="app.js?v=0.3.1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -152,9 +152,7 @@
   <dialog class="modal" id="auth-dialog" aria-labelledby="auth-title">
     <form class="dialog-card" id="auth-form" method="dialog">
       <div class="dialog-heading"><div><p class="eyebrow eyebrow--dark">Cuenta personal</p><h2 id="auth-title">Acceder a mi biblioteca</h2></div><button class="icon-button" type="button" data-close-dialog="auth-dialog" aria-label="Cerrar">×</button></div>
-      <p>Supabase Auth protege tus libros para que solo tú puedas leerlos y modificarlos.</p>
-      <button class="button button--google" id="google-auth-button" type="button"><span aria-hidden="true">G</span> Continuar con Google</button>
-      <div class="auth-separator"><span>o usa correo y contraseña</span></div>
+      <p>Accede con tu correo y contraseña. Cada cuenta mantiene una biblioteca privada e independiente.</p>
       <label class="field"><span>Correo electrónico</span><input id="auth-email" type="email" required autocomplete="email"></label>
       <label class="field"><span>Contraseña</span><input id="auth-password" type="password" required minlength="6" autocomplete="current-password"></label>
       <p class="form-message" id="auth-message" aria-live="polite"></p>
