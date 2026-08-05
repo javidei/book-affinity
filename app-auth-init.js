@@ -3,11 +3,12 @@ let authOperationInProgress = false;
 
 function authErrorMessage(error) {
   const message = String(error?.message || error || '').toLowerCase();
-  if (message.includes('invalid login credentials')) return 'Correo o contraseña incorrectos. Si acabas de crear la cuenta, confirma primero el correo.';
+  if (message.includes('invalid login credentials') || message.includes('usuario o contraseña incorrectos')) return 'Usuario, correo o contraseña incorrectos.';
   if (message.includes('email not confirmed')) return 'Tu correo todavía no está confirmado. Revisa la bandeja de entrada o reenvía el mensaje.';
   if (message.includes('email address not authorized')) return 'El servicio de correo de Supabase no permite enviar a este destinatario. Puedes crear el usuario manualmente desde Supabase o configurar un SMTP propio.';
-  if (message.includes('rate limit')) return 'Se ha alcanzado el límite temporal de correos de Supabase. Espera un poco antes de volver a intentarlo.';
+  if (message.includes('rate limit')) return 'Se ha alcanzado el límite temporal de intentos. Espera un poco antes de volver a probar.';
   if (message.includes('user already registered')) return 'Ya existe una cuenta con este correo. Inicia sesión o reenvía la confirmación.';
+  if (message.includes('function') || message.includes('username-login') || message.includes('configured')) return 'El acceso por nombre de usuario todavía no está desplegado en Supabase. Puedes entrar con tu correo mientras se configura.';
   return error?.message || String(error || 'No se ha podido completar la operación.');
 }
 
@@ -53,9 +54,14 @@ async function signIn(event) {
     return;
   }
 
-  const email = document.querySelector('#auth-email').value.trim();
+  const identifier = document.querySelector('#auth-email').value.trim();
   const password = document.querySelector('#auth-password').value;
   let confirmation = null;
+
+  if (!identifier || !password) {
+    showAuthError('Escribe tu correo o usuario y la contraseña.');
+    return;
+  }
 
   setResendVisible(false);
   elements.authMessage.textContent = 'Iniciando sesión…';
@@ -63,7 +69,7 @@ async function signIn(event) {
   setAuthOperation(true, 'Iniciando sesión…', 'Estamos cargando tu biblioteca personal.');
 
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { data, error } = await window.bookAffinitySignIn(identifier, password);
     if (error) {
       showAuthError(error);
       setResendVisible(String(error.message || '').toLowerCase().includes('email not confirmed'));
@@ -71,6 +77,7 @@ async function signIn(event) {
     }
 
     state.user = data.session?.user || data.user || null;
+    await window.loadAccountProfile?.();
     updateConnectionState();
     updateAuthButton();
     closeDialog(elements.authDialog);
@@ -79,7 +86,7 @@ async function signIn(event) {
     confirmation = {
       eyebrow: 'Sesión iniciada',
       title: 'Bienvenido',
-      message: `Has iniciado sesión como ${state.user?.email || email}. Tu biblioteca personal ya está disponible.`,
+      message: `Has iniciado sesión como ${window.bookAffinityProfile?.username ? `@${window.bookAffinityProfile.username}` : state.user?.email || identifier}. Tu biblioteca personal ya está disponible.`,
       icon: '✓',
       variant: 'success',
       buttonLabel: 'Continuar'
@@ -103,9 +110,14 @@ async function signUp() {
   const passwordInput = document.querySelector('#auth-password');
   const password = passwordInput.value;
   let confirmation = null;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!email || password.length < 6) {
-    showAuthError('Indica un correo válido y una contraseña de al menos 6 caracteres.');
+  if (!emailPattern.test(email)) {
+    showAuthError('Para crear una cuenta nueva debes escribir un correo electrónico válido.');
+    return;
+  }
+  if (password.length < 6) {
+    showAuthError('La contraseña debe tener al menos 6 caracteres.');
     return;
   }
 
@@ -138,13 +150,14 @@ async function signUp() {
 
     if (data.session) {
       state.user = data.session.user;
+      await window.loadAccountProfile?.();
       updateConnectionState();
       updateAuthButton();
       await loadLibrary();
       confirmation = {
         eyebrow: 'Cuenta creada',
         title: 'Todo listo',
-        message: `La cuenta ${email} se ha creado correctamente y ya puedes usar tu biblioteca privada.`,
+        message: `La cuenta ${email} se ha creado correctamente. En Mi cuenta puedes elegir ahora un nombre de usuario.`,
         icon: '✓',
         variant: 'success',
         buttonLabel: 'Entrar en mi biblioteca'
@@ -172,8 +185,8 @@ async function signUp() {
 async function resendConfirmation() {
   if (!configured) return;
   const email = document.querySelector('#auth-email').value.trim();
-  if (!email) {
-    showAuthError('Escribe primero el correo de la cuenta.');
+  if (!email.includes('@')) {
+    showAuthError('Escribe el correo de la cuenta para reenviar la confirmación.');
     return;
   }
 
@@ -214,37 +227,45 @@ async function resendConfirmation() {
   if (confirmation) showAuthConfirmation(confirmation);
 }
 
-async function handleAuthButton() {
-  if (state.user && supabaseClient) {
-    let confirmation = null;
-    setAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
+async function performSignOut() {
+  if (!state.user || !supabaseClient) return;
+  let confirmation = null;
+  setAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
 
-    try {
-      const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
-      if (error) {
-        showToast(`No se pudo cerrar la sesión: ${error.message}`);
-        return;
-      }
-
-      state.user = null;
-      updateConnectionState();
-      updateAuthButton();
-      await loadLibrary();
-      confirmation = {
-        eyebrow: 'Sesión cerrada',
-        title: 'Hasta pronto',
-        message: 'La sesión se ha cerrado correctamente y tu biblioteca privada vuelve a estar protegida.',
-        icon: '✓',
-        variant: 'neutral',
-        buttonLabel: 'Aceptar'
-      };
-    } catch (error) {
-      showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
-    } finally {
-      setAuthOperation(false);
+  try {
+    const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+    if (error) {
+      showToast(`No se pudo cerrar la sesión: ${error.message}`);
+      return;
     }
 
-    if (confirmation) showAuthConfirmation(confirmation);
+    state.user = null;
+    window.bookAffinityProfile = null;
+    updateConnectionState();
+    updateAuthButton();
+    await loadLibrary();
+    confirmation = {
+      eyebrow: 'Sesión cerrada',
+      title: 'Hasta pronto',
+      message: 'La sesión se ha cerrado correctamente y tu biblioteca privada vuelve a estar protegida.',
+      icon: '✓',
+      variant: 'neutral',
+      buttonLabel: 'Aceptar'
+    };
+  } catch (error) {
+    showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
+  } finally {
+    setAuthOperation(false);
+  }
+
+  if (confirmation) showAuthConfirmation(confirmation);
+}
+
+window.bookAffinitySignOut = performSignOut;
+
+async function handleAuthButton() {
+  if (state.user) {
+    await window.openAccountDialog?.();
     return;
   }
 
@@ -309,22 +330,30 @@ async function initializeAuth() {
 
   const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
+  if (state.user) await window.loadAccountProfile?.();
   updateConnectionState();
   updateAuthButton();
   await loadLibrary();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     state.user = session?.user || null;
-    updateConnectionState();
-    updateAuthButton();
-    if (event === 'SIGNED_IN') closeDialog(elements.authDialog);
-    if (!authOperationInProgress) loadLibrary();
+    if (!state.user) window.bookAffinityProfile = null;
+
+    const refreshUi = () => {
+      updateConnectionState();
+      updateAuthButton();
+      if (event === 'SIGNED_IN') closeDialog(elements.authDialog);
+      if (!authOperationInProgress) loadLibrary();
+    };
+
+    if (state.user) window.loadAccountProfile?.().finally(refreshUi);
+    else refreshUi();
   });
 }
 
 async function startApplication() {
   document.querySelector('#year').textContent = new Date().getFullYear();
-  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.2'} · ${config.webReleaseDate || '05/08/2026'}`;
+  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.4.0'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
   await initializeAuth();
 }
