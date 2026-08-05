@@ -13,6 +13,21 @@ function json(body: unknown, status = 200) {
   });
 }
 
+function readKey(mapVariable: string, legacyVariable: string) {
+  const legacyValue = Deno.env.get(legacyVariable);
+  if (legacyValue) return legacyValue;
+
+  const mapValue = Deno.env.get(mapVariable);
+  if (!mapValue) return null;
+
+  try {
+    const parsed = JSON.parse(mapValue) as Record<string, string>;
+    return parsed.default || Object.values(parsed).find(Boolean) || null;
+  } catch {
+    return mapValue;
+  }
+}
+
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
@@ -27,15 +42,19 @@ Deno.serve(async request => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const secretKey = readKey('SUPABASE_SECRET_KEYS', 'SUPABASE_SERVICE_ROLE_KEY');
+    const publishableKey = readKey('SUPABASE_PUBLISHABLE_KEYS', 'SUPABASE_ANON_KEY');
 
-    if (!supabaseUrl || !serviceRoleKey || !anonKey) {
-      console.error('Faltan variables internas de Supabase para username-login.');
-      return json({ error: 'El acceso por usuario todavía no está configurado.' }, 503);
+    if (!supabaseUrl || !secretKey || !publishableKey) {
+      console.error('Faltan variables internas de Supabase para username-login.', {
+        hasUrl: Boolean(supabaseUrl),
+        hasSecretKey: Boolean(secretKey),
+        hasPublishableKey: Boolean(publishableKey)
+      });
+      return json({ error: 'La función no encuentra las claves internas de Supabase.' }, 503);
     }
 
-    const admin = createClient(supabaseUrl, serviceRoleKey, {
+    const admin = createClient(supabaseUrl, secretKey, {
       auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
     });
 
@@ -46,8 +65,8 @@ Deno.serve(async request => {
       .maybeSingle();
 
     if (profileError) {
-      console.error('No se pudo consultar el perfil de Book Affinity.', profileError);
-      return json({ error: 'El acceso por usuario todavía no está configurado.' }, 503);
+      console.error('No se pudo consultar book_affinity_profiles.', profileError);
+      return json({ error: 'No se puede consultar la tabla de usuarios de Book Affinity.' }, 503);
     }
 
     if (!profile?.user_id) return json({ error: 'Usuario o contraseña incorrectos.' }, 401);
@@ -60,7 +79,7 @@ Deno.serve(async request => {
       return json({ error: 'Usuario o contraseña incorrectos.' }, 401);
     }
 
-    const authClient = createClient(supabaseUrl, anonKey, {
+    const authClient = createClient(supabaseUrl, publishableKey, {
       auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
     });
 
