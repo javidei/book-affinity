@@ -57,7 +57,7 @@
 .book-card--abandoned .status-pill { background: #6b6770; color: #fff; }
 
 .dialog-card--confirmation {
-  width: min(430px, calc(100vw - 36px));
+  width: min(460px, calc(100vw - 28px));
   padding: clamp(28px, 5vw, 42px);
   text-align: center;
 }
@@ -74,7 +74,19 @@
   font-weight: 800;
   box-shadow: 0 0 0 10px rgba(72, 155, 101, .09);
 }
-.save-confirmation h2 { margin-bottom: 10px; }
+.save-confirmation h2 {
+  margin: 8px 0 14px;
+  font-size: clamp(2.65rem, 9vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.035em;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+.save-confirmation.has-warning h2 {
+  font-size: clamp(2rem, 7vw, 3rem);
+  line-height: 1.05;
+}
 .save-confirmation #save-confirmation-message {
   margin: 0 auto;
   max-width: 34ch;
@@ -93,4 +105,6 @@
   .cover-upload { grid-template-columns: 82px 1fr; gap: 12px; }
   .cover-upload img { width: 82px; height: 123px; }
   .dialog-card--confirmation { padding: 30px 22px; }
+  .save-confirmation h2 { font-size: clamp(2.35rem, 13vw, 3.25rem); }
+  .save-confirmation.has-warning h2 { font-size: clamp(1.85rem, 9vw, 2.4rem); }
 }
