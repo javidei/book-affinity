@@ -55,7 +55,42 @@
 .cover-upload input[type="file"] { width: 100%; }
 .cover-upload small { display: block; margin-top: 8px; color: var(--ink-soft); line-height: 1.45; }
 .book-card--abandoned .status-pill { background: #6b6770; color: #fff; }
+
+.dialog-card--confirmation {
+  width: min(430px, calc(100vw - 36px));
+  padding: clamp(28px, 5vw, 42px);
+  text-align: center;
+}
+.save-confirmation__icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: #e1f4e8;
+  color: #267243;
+  font-size: 2.35rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 10px rgba(72, 155, 101, .09);
+}
+.save-confirmation h2 { margin-bottom: 10px; }
+.save-confirmation #save-confirmation-message {
+  margin: 0 auto;
+  max-width: 34ch;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.save-confirmation.has-warning .save-confirmation__icon {
+  background: #fff0d7;
+  color: #9a5a00;
+  box-shadow: 0 0 0 10px rgba(210, 139, 24, .10);
+}
+.dialog-actions--center { justify-content: center; }
+.save-confirmation .button { min-width: 130px; }
+
 @media (max-width: 560px) {
   .cover-upload { grid-template-columns: 82px 1fr; gap: 12px; }
   .cover-upload img { width: 82px; height: 123px; }
+  .dialog-card--confirmation { padding: 30px 22px; }
 }
