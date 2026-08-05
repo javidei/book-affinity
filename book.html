@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=0.3.2">
+  <link rel="stylesheet" href="styles.css?v=0.4.2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="config.js?v=0.3.2" defer></script>
-  <script src="detail.js?v=0.3.2" defer></script>
+  <script src="config.js?v=0.4.2" defer></script>
+  <script src="detail.js?v=0.4.2" defer></script>
 </head>
 <body class="detail-page">
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -106,8 +106,8 @@
   <dialog class="modal" id="auth-dialog" aria-labelledby="auth-title">
     <form class="dialog-card" id="auth-form" method="dialog">
       <div class="dialog-heading"><div><p class="eyebrow eyebrow--dark">Cuenta personal</p><h2 id="auth-title">Acceder a mi biblioteca</h2></div><button class="icon-button" id="close-auth" type="button" aria-label="Cerrar">×</button></div>
-      <p>Accede con tu correo y contraseña para abrir tu biblioteca privada.</p>
-      <label class="field"><span>Correo electrónico</span><input id="auth-email" type="email" required autocomplete="email"></label>
+      <p>Accede con tu correo o nombre de usuario y tu contraseña para abrir tu biblioteca privada.</p>
+      <label class="field"><span>Correo o usuario</span><input id="auth-email" type="text" required autocomplete="username"></label>
       <label class="field"><span>Contraseña</span><input id="auth-password" type="password" required minlength="6" autocomplete="current-password"></label>
       <p class="form-message" id="auth-message" aria-live="polite"></p>
       <div class="dialog-actions"><button class="button button--primary" type="submit">Iniciar sesión</button></div>
