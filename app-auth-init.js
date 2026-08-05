@@ -5,12 +5,9 @@ function authErrorMessage(error) {
   const message = String(error?.message || error || '').toLowerCase();
   if (message.includes('invalid login credentials')) return 'Correo o contraseña incorrectos. Si acabas de crear la cuenta, confirma primero el correo.';
   if (message.includes('email not confirmed')) return 'Tu correo todavía no está confirmado. Revisa la bandeja de entrada o reenvía el mensaje.';
-  if (message.includes('email address not authorized')) return 'Supabase no tiene autorizado este destinatario. Configura un SMTP propio o utiliza Continuar con Google.';
-  if (message.includes('rate limit')) return 'Se ha alcanzado el límite temporal de correos de Supabase. Espera un poco o utiliza Continuar con Google.';
-  if (message.includes('user already registered')) return 'Ya existe una cuenta con este correo. Inicia sesión, reenvía la confirmación o utiliza Google.';
-  if (message.includes('provider is not enabled') || message.includes('unsupported provider')) return 'Google no está habilitado en Supabase Authentication.';
-  if (message.includes('redirect_uri_mismatch') || message.includes('redirect uri')) return 'Google rechazó la URL de retorno. Revisa la URI autorizada en Google Cloud y la URL permitida en Supabase.';
-  if (message.includes('access_denied')) return 'Se canceló el acceso con Google.';
+  if (message.includes('email address not authorized')) return 'El servicio de correo de Supabase no permite enviar a este destinatario. Puedes crear el usuario manualmente desde Supabase o configurar un SMTP propio.';
+  if (message.includes('rate limit')) return 'Se ha alcanzado el límite temporal de correos de Supabase. Espera un poco antes de volver a intentarlo.';
+  if (message.includes('user already registered')) return 'Ya existe una cuenta con este correo. Inicia sesión o reenvía la confirmación.';
   return error?.message || String(error || 'No se ha podido completar la operación.');
 }
 
@@ -41,40 +38,6 @@ function setResendVisible(visible) {
   ensureResendButton().hidden = !visible;
 }
 
-async function signInWithGoogle() {
-  if (!configured) return;
-
-  const available = await window.checkGoogleAuthAvailability?.();
-  if (available === false) {
-    showDialog(elements.authDialog);
-    showAuthError('Google no está habilitado en Supabase Authentication.');
-    return;
-  }
-
-  window.rememberAuthReturn?.();
-  elements.authMessage.textContent = 'Abriendo Google…';
-  elements.authMessage.className = 'form-message';
-  setAuthOperation(true, 'Abriendo Google…', 'Te llevamos a Google para elegir una cuenta.');
-
-  const { data, error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: AUTH_REDIRECT_URL,
-      queryParams: { prompt: 'select_account' }
-    }
-  });
-
-  if (error) {
-    setAuthOperation(false);
-    showAuthError(error);
-    return;
-  }
-
-  if (data?.url && document.visibilityState === 'visible') {
-    window.location.assign(data.url);
-  }
-}
-
 async function signIn(event) {
   event.preventDefault();
   if (!configured) {
@@ -89,21 +52,25 @@ async function signIn(event) {
   elements.authMessage.className = 'form-message';
   setAuthOperation(true, 'Iniciando sesión…', 'Estamos cargando tu biblioteca personal.');
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error) {
-    setAuthOperation(false);
-    showAuthError(error);
-    setResendVisible(String(error.message || '').toLowerCase().includes('email not confirmed'));
-    return;
-  }
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      showAuthError(error);
+      setResendVisible(String(error.message || '').toLowerCase().includes('email not confirmed'));
+      return;
+    }
 
-  state.user = data.session?.user || data.user || null;
-  updateConnectionState();
-  updateAuthButton();
-  closeDialog(elements.authDialog);
-  await loadLibrary();
-  setAuthOperation(false);
-  showToast('Sesión iniciada.');
+    state.user = data.session?.user || data.user || null;
+    updateConnectionState();
+    updateAuthButton();
+    closeDialog(elements.authDialog);
+    await loadLibrary();
+    showToast('Sesión iniciada.');
+  } catch (error) {
+    showAuthError(error);
+  } finally {
+    setAuthOperation(false);
+  }
 }
 
 async function signUp() {
@@ -124,32 +91,37 @@ async function signUp() {
   elements.authMessage.className = 'form-message';
   setAuthOperation(true, 'Creando cuenta…', 'Estamos preparando tu biblioteca personal.');
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-    options: { emailRedirectTo: AUTH_REDIRECT_URL }
-  });
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: AUTH_REDIRECT_URL }
+    });
 
-  setAuthOperation(false);
-  if (error) {
+    if (error) {
+      showAuthError(error);
+      setResendVisible(String(error.message || '').toLowerCase().includes('already registered') || String(error.message || '').toLowerCase().includes('not confirmed'));
+      return;
+    }
+
+    if (data.session) {
+      state.user = data.session.user;
+      updateConnectionState();
+      updateAuthButton();
+      closeDialog(elements.authDialog);
+      await loadLibrary();
+      showToast('Cuenta creada y sesión iniciada.');
+      return;
+    }
+
+    elements.authMessage.textContent = 'Cuenta creada. Revisa tu correo y pulsa el enlace de confirmación para poder iniciar sesión.';
+    elements.authMessage.className = 'form-message is-success';
+    setResendVisible(true);
+  } catch (error) {
     showAuthError(error);
-    setResendVisible(String(error.message || '').toLowerCase().includes('already registered') || String(error.message || '').toLowerCase().includes('not confirmed'));
-    return;
+  } finally {
+    setAuthOperation(false);
   }
-
-  if (data.session) {
-    state.user = data.session.user;
-    updateConnectionState();
-    updateAuthButton();
-    closeDialog(elements.authDialog);
-    await loadLibrary();
-    showToast('Cuenta creada y sesión iniciada.');
-    return;
-  }
-
-  elements.authMessage.textContent = 'Cuenta creada. Te hemos enviado un enlace de confirmación. También puedes entrar con Google.';
-  elements.authMessage.className = 'form-message is-success';
-  setResendVisible(true);
 }
 
 async function resendConfirmation() {
@@ -165,37 +137,46 @@ async function resendConfirmation() {
   elements.authMessage.textContent = 'Reenviando confirmación…';
   elements.authMessage.className = 'form-message';
 
-  const { error } = await supabaseClient.auth.resend({
-    type: 'signup',
-    email,
-    options: { emailRedirectTo: AUTH_REDIRECT_URL }
-  });
+  try {
+    const { error } = await supabaseClient.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: AUTH_REDIRECT_URL }
+    });
 
-  button.disabled = false;
-  if (error) {
+    if (error) {
+      showAuthError(error);
+      return;
+    }
+    elements.authMessage.textContent = 'Correo reenviado. Revisa la bandeja de entrada, Spam y Promociones.';
+    elements.authMessage.className = 'form-message is-success';
+  } catch (error) {
     showAuthError(error);
-    return;
+  } finally {
+    button.disabled = false;
   }
-  elements.authMessage.textContent = 'Correo reenviado. Revisa la bandeja de entrada, Spam y Promociones.';
-  elements.authMessage.className = 'form-message is-success';
 }
 
 async function handleAuthButton() {
   if (state.user && supabaseClient) {
     setAuthOperation(true, 'Cerrando sesión…', 'Espera hasta que tu biblioteca quede protegida.');
-    const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
-    if (error) {
-      setAuthOperation(false);
-      showToast(`No se pudo cerrar la sesión: ${error.message}`);
-      return;
-    }
+    try {
+      const { error } = await supabaseClient.auth.signOut({ scope: 'local' });
+      if (error) {
+        showToast(`No se pudo cerrar la sesión: ${error.message}`);
+        return;
+      }
 
-    state.user = null;
-    updateConnectionState();
-    updateAuthButton();
-    await loadLibrary();
-    setAuthOperation(false);
-    showToast('Sesión cerrada.');
+      state.user = null;
+      updateConnectionState();
+      updateAuthButton();
+      await loadLibrary();
+      showToast('Sesión cerrada.');
+    } catch (error) {
+      showToast(`No se pudo cerrar la sesión: ${error.message || error}`);
+    } finally {
+      setAuthOperation(false);
+    }
     return;
   }
 
@@ -247,7 +228,6 @@ function bindEvents() {
   elements.authForm?.addEventListener('submit', signIn);
   elements.signupButton?.addEventListener('click', signUp);
   elements.authButton?.addEventListener('click', handleAuthButton);
-  document.querySelector('#google-auth-button')?.addEventListener('click', signInWithGoogle);
   ensureResendButton().addEventListener('click', resendConfirmation);
 }
 
@@ -259,45 +239,24 @@ async function initializeAuth() {
     return;
   }
 
-  const [{ data }, googleAvailable] = await Promise.all([
-    supabaseClient.auth.getSession(),
-    window.checkGoogleAuthAvailability?.()
-  ]);
+  const { data } = await supabaseClient.auth.getSession();
   state.user = data.session?.user || null;
-
-  const oauthError = window.readOAuthError?.();
-  if (oauthError) {
-    showDialog(elements.authDialog);
-    showAuthError(oauthError);
-  }
-
   updateConnectionState();
   updateAuthButton();
-
-  if (state.user && window.completeAuthReturn?.(state.user)) return;
   await loadLibrary();
-
-  if (googleAvailable === false && !oauthError) {
-    document.querySelector('#google-auth-button')?.setAttribute('aria-describedby', 'auth-message');
-  }
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     state.user = session?.user || null;
     updateConnectionState();
     updateAuthButton();
-
-    if (event === 'SIGNED_IN') {
-      closeDialog(elements.authDialog);
-      if (window.completeAuthReturn?.(state.user)) return;
-    }
-
+    if (event === 'SIGNED_IN') closeDialog(elements.authDialog);
     if (!authOperationInProgress) loadLibrary();
   });
 }
 
 async function startApplication() {
   document.querySelector('#year').textContent = new Date().getFullYear();
-  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.0'} · ${config.webReleaseDate || '05/08/2026'}`;
+  document.querySelector('#web-version').textContent = `Versión ${config.webVersion || '0.3.1'} · ${config.webReleaseDate || '05/08/2026'}`;
   bindEvents();
   await initializeAuth();
 }
