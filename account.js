@@ -24,8 +24,12 @@
       return 'La contraseña actual no es correcta.';
     }
     if (normalized.includes('weak password')) return 'La nueva contraseña no cumple los requisitos de seguridad.';
-    if (normalized.includes('could not find the function') || normalized.includes('schema cache') || normalized.includes('relation "public.profiles"')) {
-      return 'Falta ejecutar supabase/account.sql en Supabase.';
+    if (
+      normalized.includes('could not find the function')
+      || normalized.includes('schema cache')
+      || normalized.includes('book_affinity_profiles')
+    ) {
+      return 'Falta ejecutar la versión actual de supabase/account.sql en Supabase.';
     }
     return message || 'No se pudo completar la operación.';
   }
@@ -150,7 +154,7 @@
     }
 
     const { data, error } = await supabaseClient
-      .from('profiles')
+      .from('book_affinity_profiles')
       .select('username')
       .eq('user_id', state.user.id)
       .maybeSingle();
@@ -175,7 +179,7 @@
     if (username === current) return setUsernameStatus('Este es tu nombre de usuario actual.');
 
     setUsernameStatus('Comprobando disponibilidad…');
-    const { data, error } = await supabaseClient.rpc('check_username_available', { p_username: username });
+    const { data, error } = await supabaseClient.rpc('book_affinity_check_username_available', { p_username: username });
     if (requestId !== availabilityRequest) return;
     if (error) return setUsernameStatus(accountErrorMessage(error), 'error');
     setUsernameStatus(data ? 'Usuario disponible.' : 'Ese usuario ya está en uso.', data ? 'success' : 'error');
@@ -197,7 +201,7 @@
     window.setAppBusy?.(true, 'Guardando usuario…', 'Estamos comprobando que siga disponible.');
     let result;
     try {
-      result = await supabaseClient.rpc('set_my_username', { p_username: username });
+      result = await supabaseClient.rpc('book_affinity_set_my_username', { p_username: username });
     } finally {
       window.setAppBusy?.(false);
     }
