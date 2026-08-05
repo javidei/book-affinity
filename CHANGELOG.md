@@ -2,6 +2,17 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.3.0 — 05/08/2026
+
+- Muestra página y porcentaje también en las tarjetas de libros en pausa.
+- Añade modo noche con preferencia persistente y detección inicial del sistema.
+- Bloquea completamente la interfaz mientras se inicia o se cierra sesión.
+- Añade indicadores visuales de carga para acceso, registro, Google y cierre de sesión.
+- Cierra únicamente la sesión del dispositivo actual mediante el alcance local de Supabase.
+- Comprueba si Google está habilitado realmente en Supabase antes de iniciar OAuth.
+- Muestra los errores devueltos por Google y detecta problemas con la URL de retorno.
+- Conserva la página desde la que se inició Google y vuelve a ella tras autenticar.
+
 ## 0.2.3 — 05/08/2026
 
 - Corrige el título del popup para evitar cortes de palabra.
