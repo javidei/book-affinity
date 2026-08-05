@@ -13,7 +13,7 @@
       <div class="dialog-card dialog-card--confirmation">
         <div class="save-confirmation__icon" aria-hidden="true">✓</div>
         <p class="eyebrow eyebrow--dark">Cambios guardados</p>
-        <h2 id="save-confirmation-title">Guardado correctamente</h2>
+        <h2 id="save-confirmation-title">Guardado</h2>
         <p id="save-confirmation-message">Los cambios se han guardado correctamente.</p>
         <div class="dialog-actions dialog-actions--center">
           <button class="button button--primary" id="save-confirmation-close" type="button">Aceptar</button>
@@ -47,7 +47,7 @@
     const icon = dialog.querySelector('.save-confirmation__icon');
 
     dialog.classList.toggle('has-warning', warning);
-    if (title) title.textContent = warning ? 'Datos guardados con aviso' : 'Guardado correctamente';
+    if (title) title.textContent = warning ? 'Guardado con aviso' : 'Guardado';
     if (messageNode) messageNode.textContent = message;
     if (icon) icon.textContent = warning ? '!' : '✓';
 
