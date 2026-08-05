@@ -112,7 +112,7 @@ function previewSelectedBookCover(event) {
   }
   bookCoverPreviewObjectUrl = URL.createObjectURL(file);
   setBookCoverPreview(bookCoverPreviewObjectUrl);
-  elements.bookFormMessage.textContent = 'La portada personalizada se subirá al guardar.';
+  elements.bookFormMessage.textContent = 'La portada personalizada se subirá después de guardar la ficha.';
   elements.bookFormMessage.className = 'form-message';
 }
 
@@ -168,6 +168,22 @@ async function removeBookCover(path) {
   if (error) console.warn('No se pudo eliminar la portada anterior.', error);
 }
 
+function coverStorageWarning(error) {
+  const message = String(error?.message || '');
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('bucket not found')) {
+    return 'Datos guardados, pero la portada no se subió porque falta crear el bucket book-covers. Ejecuta supabase/storage.sql en Supabase.';
+  }
+  if (normalized.includes('row-level security') || normalized.includes('unauthorized') || normalized.includes('not allowed')) {
+    return 'Datos guardados, pero Supabase bloqueó la portada por permisos. Ejecuta supabase/storage.sql para instalar las políticas de Storage.';
+  }
+  if (normalized.includes('column') && normalized.includes('cover_path')) {
+    return 'Datos guardados, pero falta actualizar la columna de portadas. Ejecuta supabase/storage.sql en Supabase.';
+  }
+  return `Datos guardados, pero no se pudo subir la portada: ${message || 'error de almacenamiento'}.`;
+}
+
 async function saveBook(event) {
   event.preventDefault();
   const payload = formPayload();
@@ -176,7 +192,7 @@ async function saveBook(event) {
   const [coverFile] = document.querySelector('#book-cover-file').files || [];
 
   if (!payload.title) return;
-  elements.bookFormMessage.textContent = 'Guardando…';
+  elements.bookFormMessage.textContent = 'Guardando datos del libro…';
   elements.bookFormMessage.className = 'form-message';
 
   if (!configured) {
@@ -197,32 +213,54 @@ async function saveBook(event) {
     return;
   }
 
-  let uploadedPath = '';
-  try {
-    if (coverFile) {
-      elements.bookFormMessage.textContent = 'Subiendo portada…';
+  // La portada se guarda después. Así un fallo de Storage nunca bloquea
+  // título, estado, páginas, porcentaje, descripción o notas.
+  const basePayload = { ...payload };
+  delete basePayload.cover_path;
+
+  const result = existingId
+    ? await supabaseClient.from('books').update(basePayload).eq('id', existingId).select().single()
+    : await supabaseClient.from('books').insert({ ...basePayload, user_id: state.user.id }).select().single();
+
+  if (result.error) {
+    elements.bookFormMessage.textContent = result.error.code === '23505'
+      ? 'Ese libro ya está guardado en tu biblioteca.'
+      : `No se pudieron guardar los datos: ${result.error.message}`;
+    elements.bookFormMessage.className = 'form-message is-error';
+    return;
+  }
+
+  const savedBook = result.data;
+  let warning = '';
+
+  if (coverFile) {
+    let uploadedPath = '';
+    try {
+      elements.bookFormMessage.textContent = 'Datos guardados. Subiendo portada…';
       const uploaded = await uploadBookCover(coverFile);
       uploadedPath = uploaded.path;
-      payload.cover_path = uploaded.path;
-      payload.cover_url = uploaded.publicUrl;
-      payload.thumbnail_url = uploaded.publicUrl;
+
+      const coverResult = await supabaseClient
+        .from('books')
+        .update({
+          cover_path: uploaded.path,
+          cover_url: uploaded.publicUrl,
+          thumbnail_url: uploaded.publicUrl
+        })
+        .eq('id', savedBook.id)
+        .select()
+        .single();
+
+      if (coverResult.error) throw coverResult.error;
+      if (oldCoverPath && oldCoverPath !== uploaded.path) await removeBookCover(oldCoverPath);
+    } catch (error) {
+      if (uploadedPath) await removeBookCover(uploadedPath);
+      warning = coverStorageWarning(error);
+      console.warn(warning, error);
     }
-
-    const result = existingId
-      ? await supabaseClient.from('books').update(payload).eq('id', existingId).select().single()
-      : await supabaseClient.from('books').insert({ ...payload, user_id: state.user.id }).select().single();
-
-    if (result.error) throw result.error;
-    if (uploadedPath && oldCoverPath && oldCoverPath !== uploadedPath) await removeBookCover(oldCoverPath);
-
-    closeDialog(elements.bookDialog);
-    showToast(existingId ? 'Libro actualizado.' : 'Libro añadido a tu biblioteca.');
-    await loadLibrary();
-  } catch (error) {
-    if (uploadedPath) await removeBookCover(uploadedPath);
-    elements.bookFormMessage.textContent = error.code === '23505'
-      ? 'Ese libro ya está guardado en tu biblioteca.'
-      : `No se pudo guardar: ${error.message}`;
-    elements.bookFormMessage.className = 'form-message is-error';
   }
+
+  closeDialog(elements.bookDialog);
+  showToast(warning || (existingId ? 'Libro actualizado.' : 'Libro añadido a tu biblioteca.'));
+  await loadLibrary();
 }
