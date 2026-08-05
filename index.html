@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#201a28">
+  <meta name="description" content="Book Affinity: registra tus lecturas, organiza libros por estado y controla tu progreso.">
+  <title>Book Affinity · Tu biblioteca personal</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=0.1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="config.js?v=0.1.0" defer></script>
+  <script src="app.js?v=0.1.0" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="shell site-header__inner">
+      <a class="brand" href="index.html" aria-label="Book Affinity, inicio">
+        <img src="assets/logo.svg" alt="" width="48" height="48">
+        <span><strong>Book Affinity</strong><small>Tu biblioteca personal</small></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+        <span></span><span></span><span></span><span class="sr-only">Abrir menú</span>
+      </button>
+      <nav class="site-nav" id="main-nav" aria-label="Navegación principal">
+        <a href="#biblioteca">Mi biblioteca</a>
+        <a href="#buscar">Buscar libros</a>
+        <button class="nav-button" id="open-book-form" type="button">Añadir libro</button>
+        <button class="nav-button nav-button--ghost" id="auth-button" type="button">Entrar</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="hero">
+      <div class="shell hero__grid">
+        <div class="hero__copy">
+          <p class="eyebrow">Lecturas ordenadas, progreso visible</p>
+          <h1>Tu biblioteca ya no depende de la memoria.</h1>
+          <p class="hero__lead">Guarda lo que quieres leer, controla por qué página vas y conserva una ficha completa de cada libro.</p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="#biblioteca">Ver mi biblioteca</a>
+            <a class="button button--secondary" href="#buscar">Buscar un libro</a>
+          </div>
+          <p class="connection-state" id="connection-state" aria-live="polite">Comprobando conexión…</p>
+        </div>
+        <div class="hero__art">
+          <img src="assets/hero-library.svg" alt="Ilustración de una biblioteca personal con libros y una taza" width="760" height="520">
+        </div>
+      </div>
+    </section>
+
+    <section class="shell dashboard" id="biblioteca" aria-labelledby="library-title">
+      <div class="section-heading">
+        <div><p class="eyebrow eyebrow--dark">Resumen de lectura</p><h2 id="library-title">Mi biblioteca</h2></div>
+        <button class="button button--primary" id="open-book-form-secondary" type="button">+ Añadir libro</button>
+      </div>
+
+      <div class="stats-grid" aria-label="Estadísticas de biblioteca">
+        <article class="stat-card stat-card--reading"><span>Leyendo ahora</span><strong id="stat-reading">0</strong><small>libros en curso</small></article>
+        <article class="stat-card stat-card--wanted"><span>Quiero leer</span><strong id="stat-wanted">0</strong><small>lecturas pendientes</small></article>
+        <article class="stat-card stat-card--finished"><span>Terminados</span><strong id="stat-finished">0</strong><small>libros completados</small></article>
+        <article class="stat-card stat-card--pages"><span>Páginas registradas</span><strong id="stat-pages">0</strong><small>avance acumulado</small></article>
+      </div>
+
+      <div class="library-toolbar">
+        <label class="search-field" for="library-search"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar en mi biblioteca</span><input id="library-search" type="search" placeholder="Título, autor o género…" autocomplete="off"></label>
+        <div class="filter-group" role="group" aria-label="Filtrar biblioteca">
+          <button class="filter-button is-active" type="button" data-library-filter="all">Todos</button>
+          <button class="filter-button" type="button" data-library-filter="reading">Leyendo</button>
+          <button class="filter-button" type="button" data-library-filter="want_to_read">Quiero leer</button>
+          <button class="filter-button" type="button" data-library-filter="finished">Terminados</button>
+          <button class="filter-button" type="button" data-library-filter="paused">En pausa</button>
+        </div>
+      </div>
+
+      <p class="results-summary" id="library-summary" aria-live="polite"></p>
+      <div class="book-grid" id="library-grid" aria-live="polite" aria-busy="true"></div>
+      <div class="empty-state" id="library-empty" hidden>
+        <img src="assets/book-placeholder.svg" alt="" width="120" height="174">
+        <div><h3>Todavía no hay libros en esta vista</h3><p>Añade uno manualmente o búscalo en Google Books.</p></div>
+      </div>
+    </section>
+
+    <section class="search-section" id="buscar" aria-labelledby="search-title">
+      <div class="shell">
+        <div class="section-heading section-heading--light">
+          <div><p class="eyebrow">Buscador conectado con Google Books</p><h2 id="search-title">Encuentra una edición y añádela.</h2></div>
+          <p>Busca por título, autor, tema o ISBN. Los datos de la ficha se rellenarán automáticamente.</p>
+        </div>
+        <form class="external-search" id="google-search-form" role="search">
+          <label class="search-field search-field--large" for="google-search-input"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar libros en Google Books</span><input id="google-search-input" type="search" placeholder="Ejemplo: El nombre del viento, Tolkien, ISBN…" required autocomplete="off"></label>
+          <button class="button button--accent" type="submit">Buscar libros</button>
+        </form>
+        <p class="results-summary results-summary--light" id="google-summary" aria-live="polite">Escribe una búsqueda para ver resultados.</p>
+        <div class="search-results" id="google-results" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-main">
+      <div class="footer-branding"><img src="assets/logo.svg" alt="" width="52" height="52"><div><strong>Book Affinity</strong><p>Lecturas, progreso y próximas historias.</p></div></div>
+      <nav class="footer-links" aria-label="Enlaces del pie"><a href="#biblioteca">Mi biblioteca</a><a href="#buscar">Buscar libros</a><button type="button" id="footer-add-book">Añadir libro</button></nav>
+      <section class="creator-details" aria-labelledby="creator-title"><p>Diseño y desarrollo web</p><h2 id="creator-title">Javier Díaz</h2><a href="mailto:javyspot@gmail.com">javyspot@gmail.com</a><a href="https://wa.me/34622854155?text=Hola%20Javier%2C%20contacto%20contigo%20desde%20Book%20Affinity." target="_blank" rel="noopener noreferrer">+34 622 854 155</a></section>
+    </div>
+    <div class="shell footer-bottom"><p>© <span id="year"></span> Book Affinity</p><p>Web creada por Javier Díaz</p><p id="web-version" title="Versión y fecha de publicación"></p></div>
+  </footer>
+
+  <dialog class="modal" id="book-form-dialog" aria-labelledby="book-form-title">
+    <form class="dialog-card dialog-card--wide" id="book-form" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow eyebrow--dark">Nueva lectura</p><h2 id="book-form-title">Añadir libro</h2></div><button class="icon-button" type="button" data-close-dialog="book-form-dialog" aria-label="Cerrar">×</button></div>
+      <input type="hidden" id="book-id"><input type="hidden" id="google-books-id"><input type="hidden" id="cover-url"><input type="hidden" id="thumbnail-url">
+      <div class="form-grid">
+        <label class="field field--wide"><span>Título *</span><input id="book-title" type="text" required maxlength="220"></label>
+        <label class="field field--wide"><span>Subtítulo</span><input id="book-subtitle" type="text" maxlength="220"></label>
+        <label class="field field--wide"><span>Autor o autores</span><input id="book-authors" type="text" placeholder="Separados por comas"></label>
+        <label class="field"><span>Estado *</span><select id="book-status" required><option value="want_to_read">Quiero leer</option><option value="reading">Leyendo</option><option value="finished">Terminado</option><option value="paused">En pausa</option><option value="abandoned">Abandonado</option></select></label>
+        <label class="field"><span>Total de páginas</span><input id="book-page-count" type="number" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span>Página actual</span><input id="book-current-page" type="number" min="0" step="1" inputmode="numeric"></label>
+        <label class="field"><span>Fecha de inicio</span><input id="book-started-at" type="date"></label>
+        <label class="field"><span>Fecha de finalización</span><input id="book-finished-at" type="date"></label>
+        <label class="field"><span>Valoración</span><select id="book-rating"><option value="">Sin valorar</option><option value="1">1 estrella</option><option value="2">2 estrellas</option><option value="3">3 estrellas</option><option value="4">4 estrellas</option><option value="5">5 estrellas</option></select></label>
+        <label class="field field--wide"><span>Géneros o categorías</span><input id="book-categories" type="text" placeholder="Fantasía, novela histórica…"></label>
+        <label class="field field--wide"><span>Descripción</span><textarea id="book-description" rows="5"></textarea></label>
+        <label class="field field--wide"><span>Notas personales</span><textarea id="book-notes" rows="4" placeholder="Impresiones, citas, recordatorios…"></textarea></label>
+      </div>
+      <div class="live-progress" id="form-progress-preview"><div><span>Progreso estimado</span><strong>0%</strong></div><div class="progress-track"><span style="width:0%"></span></div></div>
+      <p class="form-message" id="book-form-message" aria-live="polite"></p>
+      <div class="dialog-actions"><button class="button button--secondary" type="button" data-close-dialog="book-form-dialog">Cancelar</button><button class="button button--primary" type="submit">Guardar libro</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="auth-dialog" aria-labelledby="auth-title">
+    <form class="dialog-card" id="auth-form" method="dialog">
+      <div class="dialog-heading"><div><p class="eyebrow eyebrow--dark">Cuenta personal</p><h2 id="auth-title">Acceder a mi biblioteca</h2></div><button class="icon-button" type="button" data-close-dialog="auth-dialog" aria-label="Cerrar">×</button></div>
+      <p>Supabase Auth protege tus libros para que solo tú puedas leerlos y modificarlos.</p>
+      <label class="field"><span>Correo electrónico</span><input id="auth-email" type="email" required autocomplete="email"></label>
+      <label class="field"><span>Contraseña</span><input id="auth-password" type="password" required minlength="6" autocomplete="current-password"></label>
+      <p class="form-message" id="auth-message" aria-live="polite"></p>
+      <div class="dialog-actions dialog-actions--stack-mobile"><button class="button button--secondary" id="signup-button" type="button">Crear cuenta</button><button class="button button--primary" type="submit">Iniciar sesión</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
