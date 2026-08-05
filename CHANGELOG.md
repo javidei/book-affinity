@@ -2,6 +2,13 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.4.5 — 06/08/2026
+
+- Elimina el logo fijo de Book Affinity del botón de cuenta.
+- Mantiene únicamente el avatar elegido por el usuario junto a su nombre.
+- Corrige el solapamiento y el espacio sobrante en la cabecera móvil.
+- Renueva las referencias de caché de portada y fichas.
+
 ## 0.4.4 — 06/08/2026
 
 - Añade cinco avatares circulares y visualmente diferentes para las cuentas.
