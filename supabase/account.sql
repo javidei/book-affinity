@@ -1,28 +1,56 @@
 -- Book Affinity · perfiles y nombres de usuario
--- Versión 0.4.0 · 05/08/2026
+-- Migración 0.4.1 · 05/08/2026
 -- Ejecuta este archivo completo en Supabase > SQL Editor.
+-- Es seguro volver a ejecutarlo: también repara instalaciones parciales.
 
+-- 1. Tabla base.
 create table if not exists public.profiles (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  username text,
-  username_normalized text generated always as (lower(trim(username))) stored,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint profiles_username_format check (
-    username is null
-    or username ~ '^[A-Za-z0-9_]{3,24}$'
-  )
+  user_id uuid primary key references auth.users(id) on delete cascade
 );
 
+-- 2. Añade las columnas aunque la tabla ya existiera de una ejecución anterior.
+alter table public.profiles
+  add column if not exists username text;
+
+alter table public.profiles
+  add column if not exists username_normalized text
+  generated always as (lower(trim(username))) stored;
+
+alter table public.profiles
+  add column if not exists created_at timestamptz not null default now();
+
+alter table public.profiles
+  add column if not exists updated_at timestamptz not null default now();
+
+-- 3. Añade la validación solo cuando todavía no exista.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_username_format'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_username_format check (
+        username is null
+        or username ~ '^[A-Za-z0-9_]{3,24}$'
+      );
+  end if;
+end;
+$$;
+
+-- La columna ya existe en este punto, incluso si la primera ejecución quedó a medias.
 create unique index if not exists profiles_username_normalized_unique
   on public.profiles (username_normalized)
   where username_normalized is not null;
 
--- Crea el perfil de los usuarios existentes.
+-- 4. Crea el perfil de los usuarios existentes.
 insert into public.profiles (user_id)
 select id from auth.users
 on conflict (user_id) do nothing;
 
+-- 5. Crea automáticamente el perfil de futuros usuarios.
 create or replace function public.handle_new_book_affinity_user()
 returns trigger
 language plpgsql
@@ -58,6 +86,7 @@ create trigger profiles_set_updated_at
 before update on public.profiles
 for each row execute function public.set_profile_updated_at();
 
+-- 6. Seguridad: cada cuenta solo puede leer su propio perfil.
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
@@ -69,6 +98,7 @@ using ((select auth.uid()) = user_id);
 revoke all on table public.profiles from anon, authenticated;
 grant select on table public.profiles to authenticated;
 
+-- 7. Comprueba disponibilidad sin exponer correos ni otros perfiles.
 create or replace function public.check_username_available(p_username text)
 returns boolean
 language plpgsql
@@ -96,6 +126,7 @@ begin
 end;
 $$;
 
+-- 8. Guarda el usuario de la cuenta autenticada y vuelve a comprobar unicidad.
 create or replace function public.set_my_username(p_username text)
 returns jsonb
 language plpgsql
@@ -143,3 +174,4 @@ grant execute on function public.set_my_username(text) to authenticated;
 
 comment on table public.profiles is 'Perfil privado de cada usuario de Book Affinity.';
 comment on column public.profiles.username is 'Nombre de usuario único usado como alternativa al correo para iniciar sesión.';
+comment on column public.profiles.username_normalized is 'Versión normalizada que garantiza la unicidad sin distinguir mayúsculas.';
