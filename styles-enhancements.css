@@ -1,33 +1,3 @@
-.button--google {
-  width: 100%;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-  border: 1px solid #d8d4dc;
-  background: #fff;
-  color: #2c2731;
-}
-.button--google:hover { background: #f7f4fa; }
-.button--google span {
-  display: inline-grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: conic-gradient(from -45deg, #4285f4 0 25%, #34a853 0 50%, #fbbc05 0 75%, #ea4335 0);
-  color: #fff;
-  font-weight: 800;
-}
-.auth-separator {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 18px 0;
-  color: var(--ink-soft);
-  font-size: .82rem;
-}
-.auth-separator::before,
-.auth-separator::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .field-help {
   margin: -6px 0 4px;
   color: var(--ink-soft);
