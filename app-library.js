@@ -1,5 +1,5 @@
 function createProgressBlock(book) {
-  if (book.status !== 'reading') return null;
+  if (!['reading', 'paused'].includes(book.status)) return null;
   const progress = clampProgress(book.current_page, book.page_count);
   const wrapper = document.createElement('div');
   wrapper.className = 'progress-block';
