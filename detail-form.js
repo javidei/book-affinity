@@ -54,6 +54,8 @@ function previewDetailCover(event) {
   }
   detailCoverPreviewObjectUrl = URL.createObjectURL(file);
   setDetailCoverPreview(detailCoverPreviewObjectUrl);
+  elements.formMessage.textContent = 'La portada se subirá después de guardar el resto de la ficha.';
+  elements.formMessage.className = 'form-message field--wide';
 }
 
 function fillEditForm() {
@@ -84,6 +86,7 @@ function payloadFromForm() {
   let currentPage = Number(document.querySelector('#edit-current-page').value) || 0;
   if (status === 'finished' && pageCount) currentPage = pageCount;
   if (pageCount && currentPage > pageCount) currentPage = pageCount;
+
   const payload = {
     title: document.querySelector('#edit-title-input').value.trim(),
     subtitle: document.querySelector('#edit-subtitle').value.trim() || null,
@@ -98,9 +101,9 @@ function payloadFromForm() {
     description: document.querySelector('#edit-description').value.trim() || null,
     notes: document.querySelector('#edit-notes').value.trim() || null,
     cover_url: state.book.cover_url || null,
-    thumbnail_url: state.book.thumbnail_url || null,
-    cover_path: state.book.cover_path || null
+    thumbnail_url: state.book.thumbnail_url || null
   };
+
   if (status === 'reading' && !payload.started_at) payload.started_at = new Date().toISOString().slice(0, 10);
   if (status === 'finished' && !payload.finished_at) payload.finished_at = new Date().toISOString().slice(0, 10);
   return payload;
@@ -111,7 +114,11 @@ async function uploadDetailCover(file) {
   const extension = extensionByType[file.type] || 'jpg';
   const uniqueName = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const path = `${state.user.id}/${uniqueName}.${extension}`;
-  const { error } = await supabaseClient.storage.from('book-covers').upload(path, file, { cacheControl: '3600', contentType: file.type, upsert: false });
+  const { error } = await supabaseClient.storage.from('book-covers').upload(path, file, {
+    cacheControl: '3600',
+    contentType: file.type,
+    upsert: false
+  });
   if (error) throw error;
   const { data } = supabaseClient.storage.from('book-covers').getPublicUrl(path);
   return { path, publicUrl: data.publicUrl };
@@ -123,26 +130,68 @@ async function removeDetailCover(path) {
   if (error) console.warn('No se pudo eliminar la portada.', error);
 }
 
+function detailCoverStorageWarning(error) {
+  const message = String(error?.message || '');
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('bucket not found')) {
+    return 'Ficha guardada, pero la portada no se subió porque falta crear el bucket book-covers. Ejecuta supabase/storage.sql en Supabase.';
+  }
+  if (normalized.includes('row-level security') || normalized.includes('unauthorized') || normalized.includes('not allowed')) {
+    return 'Ficha guardada, pero Supabase bloqueó la portada por permisos. Ejecuta supabase/storage.sql para instalar las políticas de Storage.';
+  }
+  if (normalized.includes('column') && normalized.includes('cover_path')) {
+    return 'Ficha guardada, pero falta actualizar la columna de portadas. Ejecuta supabase/storage.sql en Supabase.';
+  }
+  return `Ficha guardada, pero no se pudo subir la portada: ${message || 'error de almacenamiento'}.`;
+}
+
 async function loadBook() {
-  if (!state.id) { renderNotFound('Falta el identificador del libro en la dirección.'); return; }
+  if (!state.id) {
+    renderNotFound('Falta el identificador del libro en la dirección.');
+    return;
+  }
+
   if (!configured || !state.user) {
     state.book = demoBooks[state.id] || null;
-    state.history = state.book ? [{ current_page: state.book.current_page, status: state.book.status, recorded_at: '2026-08-05T11:00:00Z' }] : [];
+    state.history = state.book
+      ? [{ current_page: state.book.current_page, status: state.book.status, recorded_at: '2026-08-05T11:00:00Z' }]
+      : [];
     if (!state.book) {
-      renderNotFound(configured ? 'Inicia sesión para abrir los libros de tu biblioteca privada.' : 'Este identificador no existe en los datos de demostración.');
+      renderNotFound(configured
+        ? 'Inicia sesión para abrir los libros de tu biblioteca privada.'
+        : 'Este identificador no existe en los datos de demostración.');
       return;
     }
     renderBook();
     return;
   }
+
   const [bookResult, historyResult] = await Promise.all([
     supabaseClient.from('books').select('*').eq('id', state.id).single(),
     supabaseClient.from('reading_updates').select('*').eq('book_id', state.id).order('recorded_at', { ascending: false }).limit(30)
   ]);
-  if (bookResult.error || !bookResult.data) { console.error(bookResult.error); renderNotFound('El libro no existe o no pertenece a tu cuenta.'); return; }
+
+  if (bookResult.error || !bookResult.data) {
+    console.error(bookResult.error);
+    renderNotFound('El libro no existe o no pertenece a tu cuenta.');
+    return;
+  }
+
   state.book = bookResult.data;
   state.history = historyResult.data || [];
   renderBook();
+}
+
+async function refreshDetailHistory() {
+  const historyResult = await supabaseClient
+    .from('reading_updates')
+    .select('*')
+    .eq('book_id', state.book.id)
+    .order('recorded_at', { ascending: false })
+    .limit(30);
+
+  state.history = historyResult.data || [];
 }
 
 async function saveChanges(event) {
@@ -150,54 +199,102 @@ async function saveChanges(event) {
   const payload = payloadFromForm();
   const oldCoverPath = state.book.cover_path || '';
   const [coverFile] = document.querySelector('#edit-cover-file').files || [];
-  elements.formMessage.textContent = 'Guardando cambios…';
+
+  elements.formMessage.textContent = 'Guardando datos de la ficha…';
   elements.formMessage.className = 'form-message field--wide';
 
   if (!configured) {
     if (coverFile) payload.cover_url = detailCoverPreviewObjectUrl;
     state.book = { ...state.book, ...payload };
-    state.history.unshift({ current_page: payload.current_page, status: payload.status, recorded_at: new Date().toISOString() });
+    state.history.unshift({
+      current_page: payload.current_page,
+      status: payload.status,
+      recorded_at: new Date().toISOString()
+    });
     renderBook();
     elements.editPanel.hidden = true;
     showToast('Cambios aplicados en la demostración.');
     return;
   }
-  if (!state.user) { showDialog(elements.authDialog); return; }
 
-  let uploadedPath = '';
-  try {
-    if (coverFile) {
-      elements.formMessage.textContent = 'Subiendo portada…';
+  if (!state.user) {
+    showDialog(elements.authDialog);
+    return;
+  }
+
+  // Primero se guardan todos los datos que no dependen de Storage.
+  const { data, error } = await supabaseClient
+    .from('books')
+    .update(payload)
+    .eq('id', state.book.id)
+    .select()
+    .single();
+
+  if (error) {
+    elements.formMessage.textContent = `No se pudieron guardar los datos: ${error.message}`;
+    elements.formMessage.className = 'form-message field--wide is-error';
+    return;
+  }
+
+  state.book = data;
+  let warning = '';
+
+  if (coverFile) {
+    let uploadedPath = '';
+    try {
+      elements.formMessage.textContent = 'Datos guardados. Subiendo portada…';
       const uploaded = await uploadDetailCover(coverFile);
       uploadedPath = uploaded.path;
-      payload.cover_path = uploaded.path;
-      payload.cover_url = uploaded.publicUrl;
-      payload.thumbnail_url = uploaded.publicUrl;
+
+      const coverResult = await supabaseClient
+        .from('books')
+        .update({
+          cover_path: uploaded.path,
+          cover_url: uploaded.publicUrl,
+          thumbnail_url: uploaded.publicUrl
+        })
+        .eq('id', state.book.id)
+        .select()
+        .single();
+
+      if (coverResult.error) throw coverResult.error;
+      state.book = coverResult.data;
+      if (oldCoverPath && oldCoverPath !== uploaded.path) await removeDetailCover(oldCoverPath);
+    } catch (coverError) {
+      if (uploadedPath) await removeDetailCover(uploadedPath);
+      warning = detailCoverStorageWarning(coverError);
+      console.warn(warning, coverError);
     }
-    const { data, error } = await supabaseClient.from('books').update(payload).eq('id', state.book.id).select().single();
-    if (error) throw error;
-    if (uploadedPath && oldCoverPath && oldCoverPath !== uploadedPath) await removeDetailCover(oldCoverPath);
-    state.book = data;
-    const historyResult = await supabaseClient.from('reading_updates').select('*').eq('book_id', state.book.id).order('recorded_at', { ascending: false }).limit(30);
-    state.history = historyResult.data || [];
-    renderBook();
-    elements.editPanel.hidden = true;
-    showToast('Ficha actualizada.');
-  } catch (error) {
-    if (uploadedPath) await removeDetailCover(uploadedPath);
-    elements.formMessage.textContent = `No se pudo guardar: ${error.message}`;
-    elements.formMessage.className = 'form-message field--wide is-error';
   }
+
+  await refreshDetailHistory();
+  renderBook();
+  elements.editPanel.hidden = true;
+  showToast(warning || 'Ficha actualizada.');
 }
 
 async function deleteBook() {
   const accepted = window.confirm(`¿Eliminar “${state.book.title}” de tu biblioteca? Esta acción no se puede deshacer.`);
   if (!accepted) return;
-  if (!configured) { showToast('Libro eliminado de la demostración.'); window.location.href = 'index.html#biblioteca'; return; }
-  if (!state.user) { showDialog(elements.authDialog); return; }
+
+  if (!configured) {
+    showToast('Libro eliminado de la demostración.');
+    window.location.href = 'index.html#biblioteca';
+    return;
+  }
+
+  if (!state.user) {
+    showDialog(elements.authDialog);
+    return;
+  }
+
   const coverPath = state.book.cover_path || '';
   const { error } = await supabaseClient.from('books').delete().eq('id', state.book.id);
-  if (error) { showToast(`No se pudo eliminar: ${error.message}`); return; }
+  if (error) {
+    showToast(`No se pudo eliminar: ${error.message}`);
+    return;
+  }
+
   if (coverPath) await removeDetailCover(coverPath);
   window.location.href = 'index.html#biblioteca';
 }
