@@ -2,6 +2,13 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.1.1 — 05/08/2026
+
+- Añade la URL correcta de retorno tras confirmar el correo.
+- Añade un botón para reenviar el mensaje de confirmación.
+- Traduce los principales errores de autenticación al español.
+- Mejora los mensajes de registro, confirmación y límites de correo de Supabase.
+
 ## 0.1.0 — 05/08/2026
 
 - Crea la aplicación responsive y su identidad visual inicial.
