@@ -2,6 +2,13 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.2.1 — 05/08/2026
+
+- Guarda primero los datos del libro y sube la portada después.
+- Evita que un fallo de Supabase Storage bloquee título, estado, páginas, porcentaje, descripción o notas.
+- Añade mensajes específicos cuando falta el bucket o sus políticas.
+- Añade `supabase/storage.sql` como migración independiente para activar las portadas.
+
 ## 0.2.0 — 05/08/2026
 
 - Añade acceso mediante Google OAuth a la portada y a la ficha de libro.
