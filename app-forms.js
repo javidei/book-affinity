@@ -203,7 +203,7 @@ async function saveBook(event) {
     else state.books.unshift(newBook);
     renderLibrary();
     closeDialog(elements.bookDialog);
-    showToast('Libro guardado en la demostración. Configura Supabase para conservarlo.');
+    showSaveConfirmation('El libro se ha guardado correctamente en la demostración.');
     return;
   }
 
@@ -261,6 +261,11 @@ async function saveBook(event) {
   }
 
   closeDialog(elements.bookDialog);
-  showToast(warning || (existingId ? 'Libro actualizado.' : 'Libro añadido a tu biblioteca.'));
   await loadLibrary();
+  showSaveConfirmation(
+    warning || (existingId
+      ? 'Los cambios del libro se han guardado correctamente.'
+      : 'El libro se ha añadido correctamente a tu biblioteca.'),
+    { warning: Boolean(warning) }
+  );
 }
