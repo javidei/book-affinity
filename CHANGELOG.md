@@ -2,6 +2,17 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.4.0 — 05/08/2026
+
+- Añade una sección visual **Mi cuenta** dentro de la aplicación.
+- Permite elegir y cambiar un nombre de usuario único.
+- Comprueba automáticamente si el usuario está disponible antes de guardarlo.
+- Permite iniciar sesión con correo o nombre de usuario.
+- Añade cambio de contraseña verificando la contraseña actual.
+- Mantiene el correo oculto durante la resolución de nombres de usuario mediante una Edge Function.
+- Añade `supabase/account.sql`, la función `username-login` y su configuración de despliegue.
+- Muestra confirmaciones visuales al cambiar usuario o contraseña.
+
 ## 0.3.2 — 05/08/2026
 
 - Añade popups visuales para cuenta creada, sesión iniciada y sesión cerrada.
