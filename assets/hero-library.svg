@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="title desc">
+  <title id="title">Biblioteca personal</title>
+  <desc id="desc">Libros apilados, una taza y una lámpara de lectura</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#efe4d2"/>
+      <stop offset="1" stop-color="#d8c3e9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#241a2a" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <rect width="760" height="520" rx="48" fill="url(#wall)"/>
+  <circle cx="602" cy="92" r="56" fill="#f0b86e" opacity=".5"/>
+  <path d="M610 145v190" stroke="#312538" stroke-width="16" stroke-linecap="round"/>
+  <path d="M530 180h160l-44-88h-72l-44 88Z" fill="#312538"/>
+  <ellipse cx="610" cy="340" rx="96" ry="22" fill="#312538" opacity=".18"/>
+  <g filter="url(#shadow)">
+    <rect x="105" y="102" width="275" height="72" rx="18" fill="#7e5aa2" transform="rotate(-4 105 102)"/>
+    <rect x="86" y="170" width="322" height="82" rx="18" fill="#d77d6d" transform="rotate(3 86 170)"/>
+    <rect x="118" y="252" width="286" height="76" rx="18" fill="#3e6658" transform="rotate(-2 118 252)"/>
+    <rect x="96" y="326" width="330" height="86" rx="18" fill="#d7a856"/>
+    <path d="M143 105v66M177 102v66M123 180v67M158 181v67M155 255v69M193 253v69M136 331v77M174 331v77" stroke="#fff4dc" stroke-width="8" opacity=".68"/>
+  </g>
+  <g transform="translate(433 300)">
+    <path d="M0 0h100v108H0z" fill="#fff4dc" rx="14"/>
+    <path d="M100 25h26c31 0 31 58 0 58h-26" fill="none" stroke="#fff4dc" stroke-width="16"/>
+    <path d="M22 34c15 13 27 13 42 0" fill="none" stroke="#9f6fdd" stroke-width="8" stroke-linecap="round"/>
+    <path d="M34-20c-15-17 13-25 0-45M66-18c-15-17 13-25 0-45" fill="none" stroke="#7d5d95" stroke-width="6" stroke-linecap="round" opacity=".55"/>
+  </g>
+</svg>
