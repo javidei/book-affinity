@@ -1,0 +1,137 @@
+.theme-toggle--round {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(18, 13, 21, .15);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.theme-toggle--round span {
+  display: block;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.theme-toggle--round:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, .4);
+  background: rgba(255, 255, 255, .17);
+}
+
+.theme-toggle--round:focus-visible {
+  outline: 3px solid rgba(230, 173, 99, .55);
+  outline-offset: 3px;
+}
+
+.account-header-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 13px 6px 7px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(18, 13, 21, .14);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.account-header-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, .38);
+  background: rgba(255, 255, 255, .16);
+}
+
+.account-header-button:focus-visible {
+  outline: 3px solid rgba(230, 173, 99, .55);
+  outline-offset: 3px;
+}
+
+.account-header-button__logo {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 5px 14px rgba(18, 13, 21, .18);
+}
+
+.account-header-button__copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.account-header-button__copy small {
+  color: rgba(255, 255, 255, .72);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.account-header-button__copy strong {
+  max-width: 160px;
+  overflow: hidden;
+  font-size: .9rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#session-user-badge {
+  display: none !important;
+}
+
+html[data-theme="dark"] .theme-toggle--round,
+html[data-theme="dark"] .account-header-button {
+  background: rgba(255, 255, 255, .08);
+}
+
+@media (max-width: 760px) {
+  .site-header__inner {
+    gap: 9px;
+  }
+
+  .theme-toggle--round {
+    width: 42px;
+    height: 42px;
+    margin-left: auto;
+  }
+
+  .account-header-button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 8px 12px 8px 8px;
+  }
+
+  .account-header-button__copy strong {
+    max-width: min(56vw, 220px);
+  }
+}
+
+@media (max-width: 390px) {
+  .theme-toggle--round {
+    width: 40px;
+    height: 40px;
+  }
+
+  .account-header-button__copy small {
+    display: none;
+  }
+}
