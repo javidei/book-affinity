@@ -2,6 +2,14 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.3.1 — 05/08/2026
+
+- Retira temporalmente el acceso mediante Google de toda la interfaz y del código de autenticación.
+- Mantiene el acceso persistente mediante correo y contraseña de Supabase.
+- Conserva el bloqueo visual durante el inicio y el cierre de sesión.
+- Mantiene el modo noche y el progreso visible en libros en pausa.
+- Corrige las referencias de caché de `index.html` y `book.html` para cargar la versión actual.
+
 ## 0.3.0 — 05/08/2026
 
 - Muestra página y porcentaje también en las tarjetas de libros en pausa.
