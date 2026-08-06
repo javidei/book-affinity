@@ -6,8 +6,8 @@
     const username = String(window.bookAffinityProfile?.username || '').trim();
     const email = String(state?.user?.email || '').trim();
     const avatarId = String(
-      window.bookAffinityProfile?.avatar_id
-      || state?.user?.user_metadata?.book_affinity_avatar
+      state?.user?.user_metadata?.book_affinity_avatar
+      || window.bookAffinityProfile?.avatar_id
       || ''
     );
     const avatar = AVATARS.find(option => option.id === avatarId) || null;
