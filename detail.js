@@ -12,6 +12,7 @@
     'privacy-ui.js?v=0.5.1',
     'social-detail.js?v=0.5.1',
     'detail-auth-init.js?v=0.5.1',
+    'session-visibility.js?v=0.5.1',
     'signout-redirect.js?v=0.5.1'
   ];
   for (const source of modules) {
