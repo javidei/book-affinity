@@ -16,14 +16,13 @@
 
     setHidden('#biblioteca', anonymous);
     setHidden('#lectores', anonymous);
-    setHidden('.site-nav a[href="#biblioteca"]', anonymous);
-    setHidden('.site-nav a[href="#lectores"]', anonymous);
+    setHidden('.site-nav a[href$="#biblioteca"]', anonymous);
+    setHidden('.site-nav a[href$="#lectores"]', anonymous);
+    setHidden('.footer-links a[href$="#biblioteca"]', anonymous);
+    setHidden('.back-link[href$="#biblioteca"]', anonymous);
     setHidden('#open-book-form', anonymous);
     setHidden('#footer-add-book', anonymous);
     setHidden('.hero__actions a[href="#biblioteca"]', anonymous);
-
-    const socialLink = document.querySelector('.site-nav a[href="#lectores"]');
-    if (socialLink) socialLink.hidden = anonymous;
   };
 
   if (typeof updateAuthButton === 'function') {
