@@ -1,0 +1,120 @@
+/* Vista móvil centrada en utilidad: menos presentación y mejor alineación. */
+.hero__mobile-title {
+  display: none;
+}
+
+@media (max-width: 650px) {
+  .hero {
+    background:
+      radial-gradient(circle at 12% 0%, rgba(240, 184, 110, .18), transparent 34%),
+      linear-gradient(135deg, #251e2e, #31243b);
+  }
+
+  .hero__grid {
+    display: block;
+    min-height: 0;
+    padding-block: 18px;
+  }
+
+  .hero__art,
+  .hero__copy > .eyebrow,
+  .hero__copy > h1,
+  .hero__copy > .hero__lead {
+    display: none;
+  }
+
+  .hero__copy {
+    max-width: none;
+  }
+
+  .hero__mobile-title {
+    display: block;
+    margin: 0 0 11px;
+    color: rgba(255, 255, 255, .72);
+    font-size: .74rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .hero__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+  }
+
+  .hero__actions .button {
+    min-height: 42px;
+    padding: 9px 11px;
+    font-size: .84rem;
+  }
+
+  .hero .connection-state {
+    margin: 9px 0 0;
+    font-size: .74rem;
+  }
+
+  .dashboard {
+    padding-top: 32px;
+  }
+
+  .social-section {
+    padding: 42px 0;
+  }
+
+  .social-section > .shell {
+    width: min(calc(100% - 24px), 1180px);
+  }
+
+  .social-heading {
+    width: 100%;
+    align-items: flex-start !important;
+    gap: 8px;
+    margin: 0 0 18px;
+    padding: 0;
+    text-align: left;
+  }
+
+  .social-heading > div,
+  .social-heading > p {
+    width: 100%;
+    max-width: none;
+    margin-right: 0;
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .social-heading .eyebrow {
+    margin-bottom: 7px;
+  }
+
+  .social-heading h2 {
+    max-width: none;
+    margin: 0;
+    font-size: clamp(2rem, 10vw, 2.7rem);
+    line-height: 1;
+  }
+
+  .social-heading > p {
+    margin-top: 2px;
+    color: rgba(255, 255, 255, .66);
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+
+  .social-content {
+    gap: 14px;
+    margin-top: 0;
+  }
+
+  .social-panel {
+    padding: 16px 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero__actions {
+    grid-template-columns: 1fr;
+  }
+}
