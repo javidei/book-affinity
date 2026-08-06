@@ -2,6 +2,26 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.6.0 — 06/08/2026
+
+- Extiende la cabecera de escritorio a todo el ancho disponible.
+- Añade una pantalla completa **Logros** accesible desde el menú en escritorio y móvil.
+- Muestra diez logros principales desde el inicio, en gris mientras estén bloqueados y a color al completarlos.
+- Añade diez logros secretos que permanecen ocultos hasta desbloquearse.
+- Incorpora insignias SVG propias, barras de progreso y estado de cada logro.
+- Añade una columna lateral de insignias en pantallas de escritorio amplias.
+- Calcula los logros con datos reales de libros, páginas, seguidores, publicaciones y comentarios.
+- Añade `supabase/achievements.sql` con una función segura de estadísticas agregadas.
+
+## 0.5.1 — 06/08/2026
+
+- Añade confirmación visual antes de dejar de seguir a un lector.
+- Muestra todos los libros publicados, independientemente de su estado.
+- Oculta biblioteca, lectores y acciones privadas cuando no hay sesión.
+- Elimina los libros de demostración del estado desconectado.
+- Redirige a una portada limpia después de cerrar sesión.
+- Añade `supabase/social-0.5.1.sql` para actualizar las consultas sociales.
+
 ## 0.5.0 — 06/08/2026
 
 - Añade una zona **Lectores** para buscar amigos mediante su nombre de usuario.
