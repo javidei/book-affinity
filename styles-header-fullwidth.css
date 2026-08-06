@@ -1,0 +1,31 @@
+/* Cabecera realmente extendida a todo el ancho en escritorio. */
+@media (min-width: 900px) {
+  .site-header {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .site-header > .site-header__inner.shell {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
+    box-sizing: border-box;
+  }
+
+  .site-header__inner .brand {
+    flex: 0 0 auto;
+  }
+
+  .site-header__inner .theme-toggle--round {
+    margin-left: auto;
+  }
+
+  .site-header__inner .site-nav {
+    flex: 0 0 auto;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
