@@ -1,21 +1,21 @@
 // Punto de entrada de la ficha de libro.
 (async () => {
   const modules = [
-    'ui-shell.js?v=0.6.2',
-    'detail-core.js?v=0.6.2',
-    'save-popup.js?v=0.6.2',
-    'avatar-options.js?v=0.6.2',
-    'account.js?v=0.6.2',
-    'social-profile-sync.js?v=0.6.2',
-    'header-account-ui.js?v=0.6.2',
-    'detail-form.js?v=0.6.2',
-    'privacy-ui.js?v=0.6.2',
-    'social-detail.js?v=0.6.2',
-    'detail-auth-init.js?v=0.6.2',
-    'session-visibility.js?v=0.6.2',
-    'achievements.js?v=0.6.2',
-    'achievement-activity-watch.js?v=0.6.2',
-    'signout-redirect.js?v=0.6.2'
+    'ui-shell.js?v=0.6.3',
+    'detail-core.js?v=0.6.3',
+    'save-popup.js?v=0.6.3',
+    'avatar-options.js?v=0.6.3',
+    'account.js?v=0.6.3',
+    'social-profile-sync.js?v=0.6.3',
+    'header-account-ui.js?v=0.6.3',
+    'detail-form.js?v=0.6.3',
+    'privacy-ui.js?v=0.6.3',
+    'social-detail.js?v=0.6.3',
+    'detail-auth-init.js?v=0.6.3',
+    'session-visibility.js?v=0.6.3',
+    'achievements.js?v=0.6.3',
+    'achievement-activity-watch.js?v=0.6.3',
+    'signout-redirect.js?v=0.6.3'
   ];
   for (const source of modules) {
     await new Promise((resolve, reject) => {
