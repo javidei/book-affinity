@@ -1,14 +1,17 @@
 // Punto de entrada de la ficha de libro.
 (async () => {
   const modules = [
-    'ui-shell.js?v=0.4.5',
-    'detail-core.js?v=0.4.5',
-    'save-popup.js?v=0.4.5',
-    'avatar-options.js?v=0.4.5',
-    'account.js?v=0.4.5',
-    'header-account-ui.js?v=0.4.5',
-    'detail-form.js?v=0.4.5',
-    'detail-auth-init.js?v=0.4.5'
+    'ui-shell.js?v=0.5.0',
+    'detail-core.js?v=0.5.0',
+    'save-popup.js?v=0.5.0',
+    'avatar-options.js?v=0.5.0',
+    'account.js?v=0.5.0',
+    'social-profile-sync.js?v=0.5.0',
+    'header-account-ui.js?v=0.5.0',
+    'detail-form.js?v=0.5.0',
+    'privacy-ui.js?v=0.5.0',
+    'social-detail.js?v=0.5.0',
+    'detail-auth-init.js?v=0.5.0'
   ];
   for (const source of modules) {
     await new Promise((resolve, reject) => {
