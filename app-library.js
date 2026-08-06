@@ -49,10 +49,13 @@ function createBookCard(book) {
   const author = document.createElement('p');
   author.className = 'book-card__author';
   author.textContent = formatAuthors(book.authors);
+  const description = document.createElement('p');
+  description.className = 'book-card__description';
+  description.textContent = book.description || 'Sin descripción disponible para esta edición.';
   const action = document.createElement('span');
   action.className = 'book-card__action';
   action.textContent = 'Ver detalles →';
-  body.append(meta, title, author);
+  body.append(meta, title, author, description);
   const progress = createProgressBlock(book);
   if (progress) body.append(progress);
   body.append(action);
