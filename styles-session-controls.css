@@ -1,8 +1,10 @@
 /* Las zonas privadas permanecen ocultas hasta confirmar una sesión válida. */
 body:not(.is-authenticated) #biblioteca,
 body:not(.is-authenticated) #lectores,
-body:not(.is-authenticated) .site-nav a[href="#biblioteca"],
-body:not(.is-authenticated) .site-nav a[href="#lectores"],
+body:not(.is-authenticated) .site-nav a[href$="#biblioteca"],
+body:not(.is-authenticated) .site-nav a[href$="#lectores"],
+body:not(.is-authenticated) .footer-links a[href$="#biblioteca"],
+body:not(.is-authenticated) .back-link[href$="#biblioteca"],
 body:not(.is-authenticated) #open-book-form,
 body:not(.is-authenticated) #footer-add-book,
 body:not(.is-authenticated) .hero__actions a[href="#biblioteca"] {
