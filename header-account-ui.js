@@ -5,7 +5,11 @@
   function connectedIdentity() {
     const username = String(window.bookAffinityProfile?.username || '').trim();
     const email = String(state?.user?.email || '').trim();
-    const avatarId = String(state?.user?.user_metadata?.book_affinity_avatar || '');
+    const avatarId = String(
+      window.bookAffinityProfile?.avatar_id
+      || state?.user?.user_metadata?.book_affinity_avatar
+      || ''
+    );
     const avatar = AVATARS.find(option => option.id === avatarId) || null;
     const rawName = username || email.split('@')[0] || 'usuario';
     return {
@@ -38,13 +42,10 @@
 
     const copy = document.createElement('span');
     copy.className = 'account-header-button__copy';
-
     const caption = document.createElement('small');
     caption.textContent = 'Mi cuenta';
-
     const username = document.createElement('strong');
     username.textContent = identity.label;
-
     copy.append(caption, username);
     button.replaceChildren(avatarNode, copy);
   }
