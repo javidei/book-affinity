@@ -1,11 +1,12 @@
-@import url('styles-core.css?v=0.5.0');
-@import url('styles-components.css?v=0.5.0');
-@import url('styles-responsive.css?v=0.5.0');
-@import url('styles-enhancements.css?v=0.5.0');
-@import url('styles-account-avatar.css?v=0.5.0');
-@import url('styles-social.css?v=0.5.0');
-@import url('styles-theme.css?v=0.5.0');
-@import url('styles-header-controls.css?v=0.5.0');
+@import url('styles-core.css?v=0.5.1');
+@import url('styles-components.css?v=0.5.1');
+@import url('styles-responsive.css?v=0.5.1');
+@import url('styles-enhancements.css?v=0.5.1');
+@import url('styles-account-avatar.css?v=0.5.1');
+@import url('styles-social.css?v=0.5.1');
+@import url('styles-session-controls.css?v=0.5.1');
+@import url('styles-theme.css?v=0.5.1');
+@import url('styles-header-controls.css?v=0.5.1');
 
 .book-privacy-control {
   grid-template-columns: auto minmax(0, 1fr);
