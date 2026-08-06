@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#201a28">
+  <meta name="description" content="Logros lectores de Book Affinity.">
+  <title>Logros · Book Affinity</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=0.6.3">
+  <link rel="stylesheet" href="styles-achievements-page.css?v=0.6.3">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="config.js?v=0.6.3" defer></script>
+  <script src="avatar-options.js?v=0.6.3" defer></script>
+  <script src="achievements-page.js?v=0.6.3" defer></script>
+</head>
+<body class="achievements-page">
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="shell site-header__inner">
+      <a class="brand" href="index.html" aria-label="Book Affinity, inicio">
+        <img src="assets/logo.svg" alt="" width="48" height="48">
+        <span><strong>Book Affinity</strong><small>Tu biblioteca personal</small></span>
+      </a>
+
+      <button class="theme-toggle--round" id="achievements-theme-toggle" type="button" aria-label="Cambiar modo de color" title="Cambiar modo de color"><span aria-hidden="true">🌙</span></button>
+
+      <button class="menu-toggle" id="achievements-menu-toggle" type="button" aria-expanded="false" aria-controls="achievements-nav">
+        <span></span><span></span><span></span><span class="sr-only">Abrir menú</span>
+      </button>
+
+      <nav class="site-nav" id="achievements-nav" aria-label="Navegación principal">
+        <a href="index.html">Inicio</a>
+        <a href="index.html#biblioteca" id="achievements-library-link">Mi biblioteca</a>
+        <a href="index.html#lectores" id="achievements-readers-link">Lectores</a>
+        <a href="achievements.html" aria-current="page">Logros</a>
+        <a class="account-header-button achievements-account-link" id="achievements-account-link" href="index.html">
+          <span class="account-header-button__avatar account-header-button__avatar--fallback" id="achievements-account-avatar">?</span>
+          <span class="account-header-button__copy"><small id="achievements-account-caption">Cuenta</small><strong id="achievements-account-name">Entrar</strong></span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenido" class="achievements-page-main">
+    <section class="achievements-section achievements-section--standalone" aria-labelledby="achievements-title">
+      <div class="shell achievements-shell">
+        <a class="achievements-back-link" href="index.html">← Volver a Book Affinity</a>
+
+        <div class="achievements-heading">
+          <div>
+            <p class="eyebrow">Progreso personal</p>
+            <h1 id="achievements-title">Tus logros lectores</h1>
+            <p>Los diez logros principales aparecen siempre. Los secretos solo se revelan cuando cumples su objetivo.</p>
+          </div>
+          <div class="achievements-total" aria-live="polite"><strong id="achievements-unlocked-count">0</strong><span>desbloqueados</span></div>
+        </div>
+
+        <section class="achievements-login-required" id="achievements-login-required" hidden>
+          <div class="achievements-login-required__icon" aria-hidden="true">🔒</div>
+          <div><p class="eyebrow eyebrow--dark">Cuenta necesaria</p><h2>Inicia sesión para ver tus logros</h2><p>Los logros se calculan con tu biblioteca, seguidores, publicaciones y comentarios guardados en Supabase.</p></div>
+          <a class="button button--primary" href="index.html">Volver e iniciar sesión</a>
+        </section>
+
+        <div id="achievements-content" hidden>
+          <p class="achievements-message" id="achievements-message" aria-live="polite">Cargando logros…</p>
+          <div class="achievements-grid" id="achievements-grid"></div>
+          <p class="achievements-secret-note">✦ Hay más logros secretos que permanecerán ocultos hasta que los consigas.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-bottom"><p>© <span id="year"></span> Book Affinity</p><p>Web creada por Javier Díaz</p><p id="web-version"></p></div>
+  </footer>
+</body>
+</html>
