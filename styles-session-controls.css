@@ -1,0 +1,71 @@
+/* Las zonas privadas permanecen ocultas hasta confirmar una sesión válida. */
+body:not(.is-authenticated) #biblioteca,
+body:not(.is-authenticated) #lectores,
+body:not(.is-authenticated) .site-nav a[href="#biblioteca"],
+body:not(.is-authenticated) .site-nav a[href="#lectores"],
+body:not(.is-authenticated) #open-book-form,
+body:not(.is-authenticated) #footer-add-book,
+body:not(.is-authenticated) .hero__actions a[href="#biblioteca"] {
+  display: none !important;
+}
+
+.social-unfollow-confirmation__icon {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: rgba(155, 56, 68, .12);
+  color: #a13e4a;
+  font-size: 2.6rem;
+  font-weight: 900;
+  box-shadow: 0 0 0 11px rgba(155, 56, 68, .07);
+}
+
+.social-unfollow-confirmation h2 {
+  margin: 8px auto 14px;
+  max-width: 12ch;
+  font-size: clamp(2.1rem, 8vw, 3.25rem);
+  line-height: 1;
+}
+
+.social-unfollow-confirmation > p:not(.eyebrow) {
+  margin: 0 auto;
+  max-width: 39ch;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+#unfollow-confirm-user {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 18px;
+  padding: 9px 17px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-2);
+  font-size: 1rem;
+}
+
+.social-unfollow-confirmation__actions {
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+
+.social-unfollow-confirmation__actions .button {
+  min-width: 160px;
+}
+
+@media (max-width: 560px) {
+  .social-unfollow-confirmation__actions {
+    display: grid;
+    width: 100%;
+  }
+
+  .social-unfollow-confirmation__actions .button {
+    width: 100%;
+  }
+}
