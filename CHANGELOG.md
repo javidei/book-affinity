@@ -2,6 +2,21 @@
 
 Book Affinity utiliza versionado semántico `MAJOR.MINOR.PATCH`.
 
+## 0.5.0 — 06/08/2026
+
+- Añade una zona **Lectores** para buscar amigos mediante su nombre de usuario.
+- Permite seguir, dejar de seguir y consultar quién te sigue.
+- Muestra una actividad privada con los libros publicados que están leyendo las personas seguidas.
+- Añade privacidad individual a cada libro mediante la opción **Publicar para mis seguidores**.
+- Mantiene privados por defecto todos los libros existentes y nuevos.
+- Impide compartir notas personales e historial de progreso aunque la ficha esté publicada.
+- Permite abrir fichas publicadas únicamente a seguidores autenticados.
+- Añade comentarios en libros publicados para el propietario y sus seguidores.
+- Permite al autor del comentario o al propietario del libro eliminar comentarios.
+- Conserva los comentarios al volver un libro privado, pero los oculta hasta que vuelva a publicarse.
+- Sincroniza el avatar elegido con el perfil social visible.
+- Añade `supabase/social.sql` con relaciones, comentarios, funciones seguras y controles de acceso.
+
 ## 0.4.5 — 06/08/2026
 
 - Elimina el logo fijo de Book Affinity del botón de cuenta.
