@@ -6,3 +6,7 @@
 @import url('styles-social.css?v=0.5.0');
 @import url('styles-theme.css?v=0.5.0');
 @import url('styles-header-controls.css?v=0.5.0');
+
+.book-privacy-control {
+  grid-template-columns: auto minmax(0, 1fr);
+}
