@@ -10,3 +10,10 @@
 .book-privacy-control {
   grid-template-columns: auto minmax(0, 1fr);
 }
+
+.social-content[hidden],
+.social-locked[hidden],
+.comment-form[hidden],
+.comments-panel[hidden] {
+  display: none !important;
+}
