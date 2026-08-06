@@ -1,0 +1,242 @@
+/* Ajustes de densidad UX para controles de biblioteca y relaciones sociales. */
+.library-view-toolbar {
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border-radius: 14px;
+}
+
+.library-view-toolbar__copy {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.library-view-toolbar__copy strong {
+  font-size: .78rem;
+  line-height: 1.1;
+}
+
+.library-view-toolbar__copy small {
+  margin: 0;
+  font-size: .67rem;
+  line-height: 1.2;
+}
+
+.library-view-controls {
+  gap: 3px;
+  padding: 3px;
+  border-radius: 11px;
+}
+
+.library-view-button {
+  gap: 4px;
+  min-height: 31px;
+  padding: 5px 8px;
+  border-radius: 8px;
+}
+
+.library-view-button__icon {
+  font-size: .94rem;
+}
+
+.library-view-button__label {
+  font-size: .66rem;
+}
+
+/* Seguidores y personas seguidas: menos altura y listas contenidas. */
+.social-content {
+  gap: 14px;
+}
+
+.social-relations-grid {
+  gap: 12px;
+}
+
+.social-relations-grid .social-panel {
+  padding: 14px;
+  border-radius: 19px;
+}
+
+.social-relations-grid .social-panel__heading {
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 9px;
+}
+
+.social-relations-grid .social-panel__heading .eyebrow {
+  margin-bottom: 2px;
+  font-size: .59rem;
+}
+
+.social-relations-grid .social-panel h3 {
+  margin: 0;
+  font-size: 1.22rem;
+  line-height: 1.05;
+}
+
+.social-relations-grid .social-panel__heading > span {
+  min-width: 31px;
+  height: 31px;
+  padding-inline: 8px;
+  font-size: .76rem;
+}
+
+.social-relations-grid .reader-list {
+  max-height: 246px;
+  gap: 6px;
+  padding-right: 3px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.social-relations-grid .reader-row {
+  min-height: 52px;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 13px;
+}
+
+.social-relations-grid .reader-identity {
+  gap: 8px;
+}
+
+.social-relations-grid .reader-identity--compact .reader-avatar {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+  border-width: 1px;
+}
+
+.social-relations-grid .reader-identity strong {
+  font-size: .82rem;
+  line-height: 1.1;
+}
+
+.social-relations-grid .reader-identity small {
+  margin-top: 1px;
+  font-size: .65rem;
+  line-height: 1.2;
+}
+
+.social-relations-grid .reader-row__action {
+  max-width: 44%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: .64rem;
+  line-height: 1.15;
+}
+
+.social-relations-grid .social-empty {
+  padding: 11px;
+  border-radius: 12px;
+  font-size: .76rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 760px) {
+  .library-view-toolbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 7px;
+    padding: 7px 8px;
+  }
+
+  .library-view-toolbar__copy strong {
+    font-size: .72rem;
+  }
+
+  .library-view-toolbar__copy small {
+    display: none;
+  }
+
+  .library-view-controls {
+    width: 100%;
+  }
+
+  .library-view-button {
+    min-height: 30px;
+    padding: 4px 5px;
+  }
+
+  .library-view-button__label {
+    font-size: .61rem;
+  }
+
+  .social-relations-grid {
+    gap: 10px;
+  }
+
+  .social-relations-grid .social-panel {
+    padding: 12px;
+  }
+
+  .social-relations-grid .reader-list {
+    max-height: 214px;
+  }
+
+  .social-relations-grid .reader-row {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .social-relations-grid .reader-row__action {
+    align-self: center;
+    width: auto;
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .library-view-toolbar {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .library-view-toolbar__copy {
+    justify-content: center;
+  }
+
+  .library-view-button__label {
+    display: none;
+  }
+
+  .library-view-button__icon {
+    font-size: 1rem;
+  }
+
+  .social-relations-grid .social-panel h3 {
+    font-size: 1.1rem;
+  }
+
+  .social-relations-grid .reader-row {
+    min-height: 48px;
+    padding: 6px 7px;
+  }
+
+  .social-relations-grid .reader-identity--compact .reader-avatar {
+    width: 31px;
+    height: 31px;
+    flex-basis: 31px;
+  }
+
+  .social-relations-grid .reader-identity strong {
+    font-size: .77rem;
+  }
+
+  .social-relations-grid .reader-identity small {
+    max-width: 145px;
+    overflow: hidden;
+    font-size: .61rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .social-relations-grid .reader-row__action {
+    max-width: 41%;
+    padding: 5px 7px;
+    font-size: .59rem;
+  }
+}
