@@ -44,6 +44,125 @@
   font-size: .66rem;
 }
 
+/* Buscar lector: una sola línea en escritorio y un máximo de dos en móvil. */
+.social-search-panel {
+  display: grid;
+  grid-template-columns: auto minmax(240px, 1fr);
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border-radius: 18px;
+}
+
+.social-search-panel > .eyebrow {
+  display: none;
+}
+
+.social-search-panel > h3 {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.social-search-panel > .reader-search-form {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.social-search-panel .reader-search-form .field > span {
+  display: none;
+}
+
+.social-search-panel .reader-search-input {
+  min-height: 38px;
+  border-radius: 10px;
+}
+
+.social-search-panel .reader-search-input > span {
+  padding-left: 10px;
+  font-size: .92rem;
+}
+
+.social-search-panel .reader-search-input input {
+  padding: 8px 10px 8px 3px;
+  font-size: .82rem;
+}
+
+.social-search-panel .reader-search-form .button {
+  min-height: 38px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: .72rem;
+  white-space: nowrap;
+}
+
+.social-search-panel > .social-message {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  min-height: 0;
+  margin: 0;
+  font-size: .7rem;
+  line-height: 1.2;
+}
+
+.social-search-panel > .social-message:empty,
+#reader-search-result:empty {
+  display: none;
+}
+
+#reader-search-result {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  margin: 0;
+}
+
+.social-search-panel .reader-search-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.social-search-panel .reader-search-result .reader-identity {
+  gap: 8px;
+}
+
+.social-search-panel .reader-search-result .reader-avatar {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+  border-width: 1px;
+}
+
+.social-search-panel .reader-search-result .reader-identity strong {
+  font-size: .82rem;
+}
+
+.social-search-panel .reader-search-result .reader-identity small {
+  margin-top: 1px;
+  font-size: .65rem;
+  line-height: 1.2;
+}
+
+.social-search-panel .reader-search-result .button,
+.social-search-panel .reader-state-badge {
+  min-height: 32px;
+  padding: 6px 9px;
+  border-radius: 9px;
+  font-size: .65rem;
+  white-space: nowrap;
+}
+
 /* Seguidores y personas seguidas: menos altura y listas contenidas. */
 .social-content {
   gap: 14px;
@@ -165,6 +284,38 @@
     font-size: .61rem;
   }
 
+  .social-search-panel {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 9px 10px;
+  }
+
+  .social-search-panel > h3,
+  .social-search-panel > .reader-search-form,
+  .social-search-panel > .social-message,
+  #reader-search-result {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .social-search-panel > h3 {
+    font-size: .86rem;
+  }
+
+  .social-search-panel .reader-search-form {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+
+  .social-search-panel .reader-search-input,
+  .social-search-panel .reader-search-form .button {
+    min-height: 36px;
+  }
+
+  .social-search-panel .reader-search-result {
+    padding: 7px 8px;
+  }
+
   .social-relations-grid {
     gap: 10px;
   }
@@ -205,6 +356,22 @@
 
   .library-view-button__icon {
     font-size: 1rem;
+  }
+
+  .social-search-panel .reader-search-form .button {
+    padding-inline: 9px;
+    font-size: .66rem;
+  }
+
+  .social-search-panel .reader-search-result {
+    align-items: flex-start;
+  }
+
+  .social-search-panel .reader-search-result .reader-identity small {
+    max-width: 165px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .social-relations-grid .social-panel h3 {
