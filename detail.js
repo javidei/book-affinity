@@ -14,6 +14,7 @@
     'detail-auth-init.js?v=0.6.0',
     'session-visibility.js?v=0.6.0',
     'achievements.js?v=0.6.0',
+    'achievement-activity-watch.js?v=0.6.0',
     'signout-redirect.js?v=0.6.0'
   ];
   for (const source of modules) {
