@@ -1,23 +1,23 @@
 // Carga ordenada de los módulos clásicos de Book Affinity.
 (async () => {
   const modules = [
-    'ui-shell.js?v=0.6.0',
-    'app-core.js?v=0.6.0',
-    'save-popup.js?v=0.6.0',
-    'avatar-options.js?v=0.6.0',
-    'account.js?v=0.6.0',
-    'social-profile-sync.js?v=0.6.0',
-    'header-account-ui.js?v=0.6.0',
-    'app-forms.js?v=0.6.0',
-    'app-library.js?v=0.6.0',
-    'privacy-ui.js?v=0.6.0',
-    'app-search.js?v=0.6.0',
-    'social.js?v=0.6.0',
-    'session-visibility.js?v=0.6.0',
-    'achievements.js?v=0.6.0',
-    'social-controls.js?v=0.6.0',
-    'app-auth-init.js?v=0.6.0',
-    'signout-redirect.js?v=0.6.0'
+    'ui-shell.js?v=0.6.2',
+    'app-core.js?v=0.6.2',
+    'save-popup.js?v=0.6.2',
+    'avatar-options.js?v=0.6.2',
+    'account.js?v=0.6.2',
+    'social-profile-sync.js?v=0.6.2',
+    'header-account-ui.js?v=0.6.2',
+    'app-forms.js?v=0.6.2',
+    'app-library.js?v=0.6.2',
+    'privacy-ui.js?v=0.6.2',
+    'app-search.js?v=0.6.2',
+    'social.js?v=0.6.2',
+    'session-visibility.js?v=0.6.2',
+    'achievements.js?v=0.6.2',
+    'social-controls.js?v=0.6.2',
+    'app-auth-init.js?v=0.6.2',
+    'signout-redirect.js?v=0.6.2'
   ];
   for (const source of modules) {
     await new Promise((resolve, reject) => {
